@@ -2,29 +2,135 @@ import SwiftUI
 import AppKit
 import ServiceManagement
 
+private enum SettingsTab: String, CaseIterable, Identifiable {
+    case apps
+    case general
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .apps: return "轮盘"
+        case .general: return "通用"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .apps: return "排序与添加"
+        case .general: return "快捷键与行为"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .apps: return "square.grid.3x3"
+        case .general: return "gearshape"
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var appState: AppState
 
+    @State private var selectedTab: SettingsTab = .apps
+
     var body: some View {
-        TabView {
+        HStack(spacing: 0) {
+            SettingsSidebar(selectedTab: $selectedTab)
+
+            Divider()
+
+            settingsContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(nsColor: .windowBackgroundColor))
+        }
+        .frame(width: 800, height: 420)
+    }
+
+    @ViewBuilder
+    private var settingsContent: some View {
+        switch selectedTab {
+        case .apps:
             AppsSettingsView()
                 .environmentObject(appState)
-                .tabItem {
-                    Label("应用", systemImage: "square.grid.3x3")
-                }
-
+        case .general:
             GeneralSettingsView()
                 .environmentObject(appState)
-                .tabItem {
-                    Label("通用", systemImage: "gearshape")
+        }
+    }
+}
+
+private struct SettingsSidebar: View {
+    @Binding var selectedTab: SettingsTab
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            VStack(spacing: 4) {
+                ForEach(SettingsTab.allCases) { tab in
+                    SettingsSidebarButton(
+                        tab: tab,
+                        isSelected: selectedTab == tab
+                    ) {
+                        withAnimation(.spring(response: 0.25, dampingFraction: 0.82)) {
+                            selectedTab = tab
+                        }
+                    }
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 10)
+        .padding(.top, 6)
+        .padding(.bottom, 8)
+        .frame(width: 150)
+        .frame(maxHeight: .infinity)
+        .background(Color(nsColor: .controlBackgroundColor).opacity(0.72))
+    }
+}
+
+private struct SettingsSidebarButton: View {
+    let tab: SettingsTab
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: tab.symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 22)
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(tab.title)
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(tab.subtitle)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(isSelected ? .secondary : .tertiary)
                 }
 
-            AboutView()
-                .tabItem {
-                    Label("关于", systemImage: "info.circle")
-                }
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(isSelected ? .primary : .secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+            .background {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isSelected ? Color.accentColor.opacity(0.13) : Color.clear)
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .strokeBorder(isSelected ? Color.accentColor.opacity(0.18) : Color.clear, lineWidth: 1)
+            }
         }
-        .frame(width: 520, height: 540)
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.clear)
+        .contentShape(Rectangle())
     }
 }
 
@@ -37,160 +143,345 @@ struct AppsSettingsView: View {
     @State private var draggingIndex: Int? = nil
     @State private var dragTranslation: CGSize = .zero
     @State private var dragTargetIndex: Int? = nil
+    @State private var isInDeleteZone: Bool = false
 
-    @Environment(\.colorScheme) var colorScheme
+    @Namespace private var settingsGlassNS
 
-    private let pieSize: CGFloat = 340
-    private var scale: CGFloat { pieSize / PieMenuView.windowSize }
-    private var iconOrbitRadius: CGFloat { appState.settings.menuRadius * scale }
+    private let pieSize: CGFloat = 430
+    private var previewMenuRadius: CGFloat { appState.settings.menuRadius }
+    private var previewOuterDiameter: CGFloat { (previewMenuRadius + 50) * 2 }
+    private var scale: CGFloat {
+        min((pieSize - 28) / previewOuterDiameter, 1.12)
+    }
+    private var iconOrbitRadius: CGFloat { previewMenuRadius * scale }
     private var ringThickness: CGFloat { 100 * scale }
     private var outerRadius: CGFloat { iconOrbitRadius + ringThickness / 2 }
     private var innerRadius: CGFloat { iconOrbitRadius - ringThickness / 2 }
     private var center: CGFloat { pieSize / 2 }
     private var iconSize: CGFloat { appState.settings.iconSize * scale }
+    private var menuGlassOpacity: Double {
+        min(max(appState.settings.menuOpacity, 0.15), 1.0)
+    }
+    private var glassSurfaceFillOpacity: Double {
+        let normalized = (menuGlassOpacity - 0.15) / 0.85
+        return 0.03 + normalized * 0.42
+    }
 
     var body: some View {
-        VStack(spacing: 16) {
-            ZStack {
-                pieRing
-                pieIcons
-            }
-            .frame(width: pieSize, height: pieSize)
-            .onTapGesture {
-                // 点击空白区域取消选中
-                selectedIndex = nil
-            }
-
-            bottomBar
+        HStack(alignment: .center, spacing: 6) {
+            appsPreviewPane
+            appsControlPane
         }
-        .padding(.vertical, 10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .sheet(isPresented: $showingAppPicker) {
             AppPickerView(appState: appState, isPresented: $showingAppPicker)
+        }
+        .sheet(isPresented: $showUpgrade) {
+            UpgradeView()
+                .environmentObject(appState)
         }
     }
 
     // MARK: - 底部按钮
 
+    private var maxSlots: Int { appState.pro.maxSlots }
+
     private func addFileOrFolder() {
-        guard appState.settings.apps.count < 12 else { return }
+        guard appState.settings.apps.count < maxSlots else { return }
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
+        panel.resolvesAliases = true
         panel.prompt = "添加"
         panel.message = "选择要添加到轮盘的文件或文件夹"
         if panel.runModal() == .OK, let url = panel.url {
+            let bookmarkData = try? url.bookmarkData(
+                options: [.withSecurityScope],
+                includingResourceValuesForKeys: nil,
+                relativeTo: nil
+            )
             let item = AppItem(
                 name: url.lastPathComponent,
                 bundleIdentifier: "",
                 path: url.path,
-                itemType: .fileOrFolder
+                itemType: .fileOrFolder,
+                bookmarkData: bookmarkData,
+                customIconData: AppItem.persistentCustomIconData(for: url)
             )
-            appState.settings.apps.append(item)
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                appState.settings.apps.append(item)
+            }
             IconCache.shared.invalidate()
         }
     }
 
-    private var bottomBar: some View {
-        HStack(spacing: 12) {
-            Button(action: { showingAppPicker = true }) {
-                Label("应用", systemImage: "plus")
-            }
-            .disabled(appState.settings.apps.count >= 12)
+    @State private var showUpgrade = false
 
-            Button(action: { addFileOrFolder() }) {
-                Label("文件夹", systemImage: "folder.badge.plus")
-            }
-            .disabled(appState.settings.apps.count >= 12)
+    private var appsPreviewPane: some View {
+        wheelStage
+            .frame(width: 420, height: 420, alignment: .center)
+    }
 
-            Spacer()
+    private var wheelStage: some View {
+        ZStack {
+            Circle()
+                .fill(.white.opacity(0.16))
+                .frame(width: pieSize, height: pieSize)
+                .scaleEffect((pieSize + 34) / pieSize)
+                .blur(radius: 26)
+                .allowsHitTesting(false)
 
-            Text("\(appState.settings.apps.count) / 12")
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Capsule().fill(.quaternary))
-
-            Spacer()
-
-            Button("恢复默认") {
-                selectedIndex = nil
-                appState.settings.apps = AppState.defaultApps()
-            }
-            .foregroundColor(.secondary)
+            pieRing
+            pieIcons
         }
-        .padding(.horizontal, 20)
+        .frame(width: pieSize, height: pieSize)
+        .onTapGesture {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.65)) {
+                selectedIndex = nil
+            }
+        }
+    }
+
+    private var appsControlPane: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            controlList
+        }
+        .frame(width: 184)
+    }
+
+    private var controlList: some View {
+        VStack(spacing: 0) {
+            actionTile(
+                "添加应用",
+                subtitle: "从应用程序选择",
+                icon: "plus.app"
+            ) {
+                if appState.settings.apps.count >= maxSlots && !appState.pro.isPro {
+                    showUpgrade = true
+                } else {
+                    showingAppPicker = true
+                }
+            }
+            .disabled(appState.settings.apps.count >= maxSlots && appState.pro.isPro)
+
+            Divider()
+                .padding(.leading, 44)
+
+            actionTile(
+                "添加文件夹",
+                subtitle: appState.pro.canAddFolder ? "文件或文件夹都可以" : "Pro 解锁",
+                icon: "folder.badge.plus",
+                badge: appState.pro.isPro ? nil : "PRO"
+            ) {
+                if !appState.pro.canAddFolder {
+                    showUpgrade = true
+                } else {
+                    addFileOrFolder()
+                }
+            }
+
+            Divider()
+                .padding(.leading, 44)
+
+            actionTile(
+                "恢复默认",
+                subtitle: "重新放回系统常用项",
+                icon: "arrow.counterclockwise"
+            ) {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    selectedIndex = nil
+                    appState.settings.apps = Array(AppState.defaultApps().prefix(maxSlots))
+                }
+            }
+        }
+        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.055), lineWidth: 1)
+        }
+    }
+
+    private func actionTile(
+        _ title: String,
+        subtitle: String,
+        icon: String,
+        badge: String? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: icon)
+                    .font(.system(size: 16, weight: .semibold))
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 24)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 5) {
+                        Text(title)
+                            .font(.system(size: 13, weight: .semibold))
+                        if let badge {
+                            Text(badge)
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundColor(.orange)
+                        }
+                    }
+                    Text(subtitle)
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                }
+
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 9)
+            .frame(height: 58)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - 圆环
 
     private var pieRing: some View {
-        let dark = colorScheme == .dark
-        let shadowColor: Color = .black.opacity(dark ? 0.4 : 0.08)
-        let ringColor: Color = dark ? Color(red: 0.16, green: 0.17, blue: 0.21) : .white.opacity(0.75)
-        let borderColor: Color = dark ? Color(red: 0.28, green: 0.30, blue: 0.35) : .white.opacity(0.5)
-        let fillColor: Color = dark ? Color(red: 0.11, green: 0.12, blue: 0.15) : .white.opacity(0.55)
-        let strokeColor: Color = dark ? Color(red: 0.22, green: 0.23, blue: 0.28) : .primary.opacity(0.06)
+        ZStack {
+            GlassEffectContainer {
+                ZStack {
+                    settingsGlassSurfaceLayer
 
-        return ZStack {
-            Circle()
-                .fill(RadialGradient(colors: [shadowColor, .clear],
-                                     center: .center, startRadius: outerRadius - 5, endRadius: outerRadius + 20))
-                .frame(width: outerRadius * 2 + 40, height: outerRadius * 2 + 40)
-            Circle().fill(ringColor).frame(width: outerRadius * 2, height: outerRadius * 2)
-            Circle().stroke(borderColor, lineWidth: 0.5).frame(width: outerRadius * 2, height: outerRadius * 2)
-            Circle().fill(fillColor).frame(width: innerRadius * 2, height: innerRadius * 2)
-            Circle().stroke(strokeColor, lineWidth: 0.5).frame(width: innerRadius * 2, height: innerRadius * 2)
+                    Color.clear
+                        .frame(width: outerRadius * 2, height: outerRadius * 2)
+                        .glassEffect(.regular.interactive(), in: DonutShape(
+                            innerRadius: innerRadius,
+                            outerRadius: outerRadius
+                        ))
+                        .glassEffectID("settingsRing", in: settingsGlassNS)
+                        .opacity(menuGlassOpacity)
+
+                    Color.clear
+                        .frame(width: innerRadius * 2 + 4, height: innerRadius * 2 + 4)
+                        .glassEffect(.regular, in: .circle)
+                        .glassEffectID("settingsCenter", in: settingsGlassNS)
+                        .scaleEffect(selectedIndex != nil ? 1.04 : 1.0)
+                        .animation(.spring(response: 0.4, dampingFraction: 0.5),
+                                   value: selectedIndex != nil)
+                        .opacity(menuGlassOpacity)
+
+                    settingsGlassRefractionLayer
+                }
+            }
+
             centerLabel
         }
+    }
+
+    @ViewBuilder
+    private var settingsGlassSurfaceLayer: some View {
+        ZStack {
+            DonutShape(innerRadius: innerRadius, outerRadius: outerRadius)
+                .fill(Color.white.opacity(glassSurfaceFillOpacity))
+
+            Circle()
+                .fill(Color.white.opacity(glassSurfaceFillOpacity * 0.72))
+                .frame(width: innerRadius * 2 + 4, height: innerRadius * 2 + 4)
+        }
+        .frame(width: outerRadius * 2, height: outerRadius * 2)
+        .allowsHitTesting(false)
+    }
+
+    @ViewBuilder
+    private var settingsGlassRefractionLayer: some View {
+        ZStack {
+            DonutShape(innerRadius: innerRadius + 1, outerRadius: outerRadius - 1)
+                .stroke(Color.white.opacity(0.24 * menuGlassOpacity), lineWidth: 1)
+                .blur(radius: 0.3)
+
+            DonutShape(innerRadius: innerRadius + 7, outerRadius: outerRadius - 7)
+                .stroke(Color.black.opacity(0.045 * menuGlassOpacity), lineWidth: 5)
+                .blur(radius: 4.5)
+                .blendMode(.multiply)
+
+            Circle()
+                .stroke(Color.white.opacity(0.18 * menuGlassOpacity), lineWidth: 1)
+                .frame(width: innerRadius * 2 - 7, height: innerRadius * 2 - 7)
+                .blur(radius: 0.3)
+
+            Circle()
+                .stroke(Color.black.opacity(0.04 * menuGlassOpacity), lineWidth: 4.5)
+                .frame(width: innerRadius * 2 - 18, height: innerRadius * 2 - 18)
+                .blur(radius: 4.5)
+                .blendMode(.multiply)
+        }
+        .frame(width: outerRadius * 2, height: outerRadius * 2)
+        .allowsHitTesting(false)
     }
 
     // MARK: - 中心标签
 
     @ViewBuilder
     private var centerLabel: some View {
-        if let idx = selectedIndex, idx < appState.settings.apps.count {
-            // 选中状态：显示名称 + 删除按钮
-            VStack(spacing: 6) {
+        ZStack {
+            // 1. 删除区激活（拖到中心）
+            if isInDeleteZone {
+                VStack(spacing: 4) {
+                    Image(systemName: "trash.fill")
+                        .font(.system(size: 26, weight: .semibold))
+                    Text("松开删除")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundStyle(.red)
+                .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+            // 2. 拖拽中（未进入删除区）
+            else if draggingIndex != nil {
+                VStack(spacing: 2) {
+                    Text("拖至中心")
+                        .font(.system(size: 10))
+                    Text("可删除")
+                        .font(.system(size: 10))
+                }
+                .foregroundStyle(.secondary)
+                .transition(.opacity)
+            }
+            // 3. 选中状态（点击图标）
+            else if let idx = selectedIndex, idx < appState.settings.apps.count {
                 Text(appState.settings.apps[idx].displayName)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                Button(action: {
-                    withAnimation(.easeOut(duration: 0.2)) {
-                        let id = appState.settings.apps[idx].id
-                        selectedIndex = nil
-                        appState.settings.apps.removeAll { $0.id == id }
-                    }
-                }) {
-                    Label("移除", systemImage: "trash")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.red)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
+                    .padding(.horizontal, 12)
+                    .transition(.scale(scale: 0.75).combined(with: .opacity))
             }
-        } else if draggingIndex != nil {
-            Text("拖到目标位置松开")
-                .font(.system(size: 10))
-                .foregroundStyle(.secondary)
-        } else if appState.settings.apps.isEmpty {
-            Text("点击下方添加应用")
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-        } else {
-            Text("点击选中 · 拖拽排序")
-                .font(.system(size: 10))
+            // 4. 空状态
+            else if appState.settings.apps.isEmpty {
+                Text("点击下方添加应用")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            // 5. 默认提示
+            else {
+                VStack(spacing: 2) {
+                    Text("拖动排序")
+                        .font(.system(size: 10))
+                    Text("拖至中心删除")
+                        .font(.system(size: 10))
+                }
                 .foregroundStyle(.tertiary)
+            }
         }
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: selectedIndex)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isInDeleteZone)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: draggingIndex)
     }
 
     // MARK: - 图标
 
-    // 拖拽时的预览顺序：模拟 item 已移动到目标位置
     private var previewOrder: [Int] {
         let total = appState.settings.apps.count
         guard let from = draggingIndex, let to = dragTargetIndex,
@@ -208,7 +499,6 @@ struct AppsSettingsView: View {
         let total = apps.count
         let preview = previewOrder
         return ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
-            // 非拖拽图标用预览位置，拖拽图标跟随鼠标
             let displaySlot = preview.firstIndex(of: index) ?? index
             pieIcon(app: app, index: index, displaySlot: displaySlot, total: total)
         }
@@ -225,32 +515,48 @@ struct AppsSettingsView: View {
         let targetPos = slotPosition(slot: displaySlot, total: total)
         let isSelected = selectedIndex == index
         let isDragging = draggingIndex == index
+        let angle = (2 * Double.pi / Double(max(total, 1))) * Double(index) - .pi / 2
+        let pushDist: CGFloat = 6
 
-        // 拖拽中的图标跟鼠标，其他图标平滑移到预览位置
         let posX = isDragging ? originalPos.x + dragTranslation.width : targetPos.x
         let posY = isDragging ? originalPos.y + dragTranslation.height : targetPos.y
 
         return ZStack {
+            // 选中高亮圆 — 柔和的 tint 底色
+            if isSelected && !isDragging {
+                Circle()
+                    .fill(.tint.opacity(0.1))
+                    .frame(width: iconSize + 12, height: iconSize + 12)
+                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+
             Image(nsImage: app.icon)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: iconSize, height: iconSize)
-                .shadow(color: .black.opacity(isDragging ? 0.2 : 0.1),
-                        radius: isDragging ? 4 : 1, x: 0, y: isDragging ? 2 : 0.5)
-                .scaleEffect(isDragging ? 1.2 : (isSelected ? 1.15 : 1.0))
-
-            if isSelected && !isDragging {
-                Circle()
-                    .stroke(Color.accentColor, lineWidth: 2)
-                    .frame(width: iconSize + 6, height: iconSize + 6)
-            }
+                .overlay {
+                    if isDragging && isInDeleteZone {
+                        Circle()
+                            .fill(.red.opacity(0.45))
+                            .overlay {
+                                Image(systemName: "trash.fill")
+                                    .font(.system(size: iconSize * 0.35, weight: .bold))
+                                    .foregroundStyle(.white)
+                            }
+                            .transition(.opacity)
+                    }
+                }
         }
+        .scaleEffect(isDragging ? (isInDeleteZone ? 0.85 : 1.2) : (isSelected ? 1.15 : 1.0))
+        .offset(
+            x: isSelected && !isDragging ? cos(angle) * pushDist : 0,
+            y: isSelected && !isDragging ? -sin(angle) * pushDist : 0
+        )
         .position(x: posX, y: posY)
-        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: displaySlot)
         .zIndex(isDragging ? 10 : (isSelected ? 5 : 0))
         .gesture(dragGesture(index: index, total: total, originX: originalPos.x, originY: originalPos.y))
         .onTapGesture {
-            withAnimation(.easeOut(duration: 0.15)) {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.55)) {
                 selectedIndex = selectedIndex == index ? nil : index
             }
         }
@@ -261,27 +567,56 @@ struct AppsSettingsView: View {
     private func dragGesture(index: Int, total: Int, originX: CGFloat, originY: CGFloat) -> some Gesture {
         DragGesture(minimumDistance: 8)
             .onChanged { value in
-                if draggingIndex == nil { selectedIndex = nil }
-                draggingIndex = index
+                if draggingIndex == nil {
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) {
+                        selectedIndex = nil
+                        draggingIndex = index
+                    }
+                } else {
+                    draggingIndex = index
+                }
                 dragTranslation = value.translation
 
-                // 实时计算目标位置，让其他图标预览移动
                 let absX = originX + value.translation.width
                 let absY = originY + value.translation.height
-                let target = slotIndex(at: CGPoint(x: absX, y: absY), total: total)
-                if target != dragTargetIndex {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                        dragTargetIndex = target
+                let distFromCenter = hypot(absX - center, absY - center)
+                let inDelete = distFromCenter < innerRadius
+
+                if inDelete != isInDeleteZone {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                        isInDeleteZone = inDelete
+                    }
+                }
+
+                if inDelete {
+                    // 进入删除区时取消排序预览
+                    if dragTargetIndex != nil {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            dragTargetIndex = nil
+                        }
+                    }
+                } else {
+                    let target = slotIndex(at: CGPoint(x: absX, y: absY), total: total)
+                    if target != dragTargetIndex {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
+                            dragTargetIndex = target
+                        }
                     }
                 }
             }
             .onEnded { value in
                 let absX = originX + value.translation.width
                 let absY = originY + value.translation.height
+                let distFromCenter = hypot(absX - center, absY - center)
+                let inDelete = distFromCenter < innerRadius
                 let target = slotIndex(at: CGPoint(x: absX, y: absY), total: total)
 
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.75)) {
-                    if target != index {
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
+                    if inDelete {
+                        // 拖到中心 → 删除
+                        appState.settings.apps.remove(at: index)
+                    } else if target != index {
+                        // 拖到其它槽位 → 重新排序
                         let item = appState.settings.apps.remove(at: index)
                         let insertAt = min(target, appState.settings.apps.count)
                         appState.settings.apps.insert(item, at: insertAt)
@@ -289,6 +624,7 @@ struct AppsSettingsView: View {
                     draggingIndex = nil
                     dragTranslation = .zero
                     dragTargetIndex = nil
+                    isInDeleteZone = false
                 }
             }
     }
@@ -312,6 +648,7 @@ struct AppPickerView: View {
     @Binding var isPresented: Bool
     @State private var searchText = ""
     @State private var installedApps: [AppItem] = []
+    @State private var recentlyAdded: Set<String> = []
 
     var filteredApps: [AppItem] {
         let existing = Set(appState.settings.apps.map { $0.bundleIdentifier })
@@ -334,18 +671,18 @@ struct AppPickerView: View {
                     .font(.system(size: 15, weight: .semibold))
                 Spacer()
                 Button("完成") { isPresented = false }
+                    .buttonStyle(.glass)
                     .keyboardShortcut(.defaultAction)
             }
 
-            TextField("搜索应用...", text: $searchText)
-                .textFieldStyle(.roundedBorder)
+            SearchField(text: $searchText, placeholder: "搜索应用...")
 
             List(filteredApps) { app in
+                let justAdded = recentlyAdded.contains(app.bundleIdentifier)
                 HStack(spacing: 12) {
                     Image(nsImage: app.icon)
                         .resizable()
                         .frame(width: 28, height: 28)
-                        .shadow(color: .black.opacity(0.06), radius: 1, x: 0, y: 1)
 
                     VStack(alignment: .leading, spacing: 1) {
                         Text(app.displayName)
@@ -359,13 +696,21 @@ struct AppPickerView: View {
 
                     Spacer()
 
-                    Button(action: { addApp(app) }) {
-                        Image(systemName: "plus.circle.fill")
+                    if justAdded {
+                        Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 16))
-                            .symbolRenderingMode(.hierarchical)
                             .foregroundColor(.green)
+                            .transition(.scale.combined(with: .opacity))
+                    } else {
+                        Button(action: { addApp(app) }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 16))
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundColor(.green)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(appState.settings.apps.count >= appState.pro.maxSlots)
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.vertical, 2)
             }
@@ -379,88 +724,309 @@ struct AppPickerView: View {
     }
 
     func addApp(_ app: AppItem) {
-        guard appState.settings.apps.count < 12 else { return }
-        withAnimation(.easeOut(duration: 0.2)) {
+        guard appState.settings.apps.count < appState.pro.maxSlots else { return }
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
             appState.settings.apps.append(app)
+            recentlyAdded.insert(app.bundleIdentifier)
+        }
+        // 短暂显示勾后从列表移除
+        let bid = app.bundleIdentifier
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.25)) {
+                _ = recentlyAdded.remove(bid)
+            }
         }
     }
 }
 
 // MARK: - 通用设置
 
+private struct SettingsGroup<Content: View>: View {
+    let title: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(title)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 10)
+                .padding(.top, 10)
+                .padding(.bottom, 5)
+
+            content
+        }
+        .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.055), lineWidth: 1)
+        }
+    }
+}
+
+private struct SettingRow<Accessory: View>: View {
+    let title: String
+    var locked: Bool = false
+    @ViewBuilder var accessory: Accessory
+
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                    .lineLimit(1)
+                if locked {
+                    Text("PRO")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundColor(.orange)
+                }
+            }
+            .foregroundStyle(locked ? .secondary : .primary)
+
+            Spacer(minLength: 8)
+            accessory
+                .controlSize(.small)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 38)
+    }
+}
+
+private struct SettingDivider: View {
+    var body: some View {
+        Divider()
+            .padding(.leading, 10)
+    }
+}
+
 struct GeneralSettingsView: View {
     @EnvironmentObject var appState: AppState
     @State private var launchAtLogin = false
 
     var body: some View {
-        Form {
-            Section("快捷键") {
-                HotkeyRecorderRow(appState: appState)
-            }
+        HStack(alignment: .top, spacing: 14) {
+            primaryColumn
+            secondaryColumn
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .onAppear {
+            launchAtLogin = getLaunchAtLogin()
+        }
+    }
 
-            Section("交互模式") {
-                Picker("模式", selection: $appState.settings.interactionMode) {
-                    ForEach(InteractionMode.allCases, id: \.self) { mode in
-                        Text(mode.displayName).tag(mode)
+    private var primaryColumn: some View {
+        VStack(spacing: 12) {
+            triggerGroup
+            playbackGroup
+        }
+        .frame(width: 292)
+    }
+
+    private var secondaryColumn: some View {
+        VStack(spacing: 12) {
+            wheelGroup
+            systemGroup
+        }
+        .frame(width: 292)
+    }
+
+    private var triggerGroup: some View {
+        SettingsGroup(title: "唤出") {
+            HotkeyRecorderRow(appState: appState)
+
+            SettingDivider()
+
+            SettingRow(title: "鼠标", locked: !appState.pro.isPro) {
+                Picker("", selection: $appState.settings.mouseTrigger) {
+                    ForEach(MouseTrigger.allCases, id: \.self) { trigger in
+                        Text(trigger.displayName).tag(trigger)
                     }
                 }
-                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                .frame(width: 112)
+                .disabled(!appState.pro.isPro)
+                .onChange(of: appState.settings.mouseTrigger) { _ in
+                    NotificationCenter.default.post(name: .mouseTriggerChanged, object: nil)
+                }
             }
 
-            Section("轮盘位置") {
-                Picker("位置", selection: $appState.settings.menuPosition) {
-                    Text("跟随鼠标").tag(MenuPosition.followMouse)
-                    Text("屏幕居中").tag(MenuPosition.screenCenter)
+            SettingDivider()
+
+            SettingRow(title: "模式") {
+                Picker("", selection: $appState.settings.interactionMode) {
+                    Text("点击").tag(InteractionMode.click)
+                    Text("按住").tag(InteractionMode.hold)
                 }
-                .pickerStyle(.radioGroup)
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .frame(width: 112)
+            }
+        }
+    }
+
+    private var playbackGroup: some View {
+        SettingsGroup(title: "播放") {
+            SettingRow(title: "正在播放") {
+                Toggle("", isOn: $appState.settings.showMusicControl)
+                    .labelsHidden()
             }
 
-            Section("外观") {
-                Picker("主题", selection: $appState.settings.appearanceMode) {
-                    Text("跟随系统").tag(AppearanceMode.system)
-                    Text("浅色").tag(AppearanceMode.light)
-                    Text("深色").tag(AppearanceMode.dark)
+            SettingDivider()
+
+            SettingRow(title: "播放控制", locked: !appState.pro.isPro) {
+                Toggle("", isOn: .constant(appState.pro.canControlMusic))
+                    .labelsHidden()
+                    .disabled(!appState.pro.isPro)
+            }
+
+            SettingDivider()
+
+            SettingRow(title: "触控反馈") {
+                Toggle("", isOn: $appState.settings.hapticFeedback)
+                    .labelsHidden()
+            }
+
+            SettingDivider()
+
+            SettingRow(title: "音效") {
+                Toggle("", isOn: $appState.settings.soundEffects)
+                    .labelsHidden()
+            }
+        }
+    }
+
+    private var wheelGroup: some View {
+        SettingsGroup(title: "轮盘") {
+            SettingRow(title: "位置") {
+                Picker("", selection: $appState.settings.menuPosition) {
+                    Text("鼠标").tag(MenuPosition.followMouse)
+                    Text("居中").tag(MenuPosition.screenCenter)
                 }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .frame(width: 112)
+            }
+
+            SettingDivider()
+
+            SettingRow(title: "主题") {
+                Picker("", selection: $appState.settings.appearanceMode) {
+                    Text("系统").tag(AppearanceMode.system)
+                    Text("浅").tag(AppearanceMode.light)
+                    Text("深").tag(AppearanceMode.dark)
+                }
+                .labelsHidden()
+                .pickerStyle(.segmented)
+                .frame(width: 124)
                 .onChange(of: appState.settings.appearanceMode) { _ in
                     NotificationCenter.default.post(name: .appearanceChanged, object: nil)
                 }
-
-                HStack {
-                    Text("菜单半径")
-                    Slider(value: $appState.settings.menuRadius, in: 100...180, step: 10)
-                    Text("\(Int(appState.settings.menuRadius))")
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .frame(width: 36, alignment: .trailing)
-                }
-
-                HStack {
-                    Text("图标大小")
-                    Slider(value: $appState.settings.iconSize, in: 32...64, step: 4)
-                    Text("\(Int(appState.settings.iconSize))")
-                        .font(.system(.body, design: .monospaced))
-                        .foregroundColor(.secondary)
-                        .frame(width: 36, alignment: .trailing)
-                }
             }
 
-            Section("反馈") {
-                Toggle("触觉反馈（触控板）", isOn: $appState.settings.hapticFeedback)
-                Toggle("音效", isOn: $appState.settings.soundEffects)
-            }
+            SettingDivider()
 
-            Section("系统") {
-                Toggle("开机自动启动", isOn: $launchAtLogin)
+            sliderRow(
+                title: "半径",
+                value: $appState.settings.menuRadius,
+                range: 100...180,
+                step: 10,
+                locked: !appState.pro.isPro
+            )
+
+            SettingDivider()
+
+            sliderRow(
+                title: "图标",
+                value: $appState.settings.iconSize,
+                range: 32...64,
+                step: 4,
+                locked: !appState.pro.isPro
+            )
+
+            SettingDivider()
+
+            opacitySliderRow(
+                title: "透明度",
+                value: $appState.settings.menuOpacity,
+                range: 0.15...1.0,
+                step: 0.05
+            )
+        }
+    }
+
+    private var systemGroup: some View {
+        SettingsGroup(title: "系统") {
+            SettingRow(title: "开机启动") {
+                Toggle("", isOn: $launchAtLogin)
+                    .labelsHidden()
                     .onChange(of: launchAtLogin) { newValue in
                         setLaunchAtLogin(newValue)
                     }
             }
+
+            SettingDivider()
+
+            SettingRow(title: "菜单栏") {
+                Toggle("", isOn: $appState.settings.showMenuBarIcon)
+                    .labelsHidden()
+                    .onChange(of: appState.settings.showMenuBarIcon) { _ in
+                        NotificationCenter.default.post(name: .menuBarIconChanged, object: nil)
+                    }
+            }
         }
-        .formStyle(.grouped)
-        .padding(.horizontal, 8)
-        .onAppear {
-            launchAtLogin = getLaunchAtLogin()
+    }
+
+    private func sliderRow(
+        title: String,
+        value: Binding<Double>,
+        range: ClosedRange<Double>,
+        step: Double,
+        locked: Bool
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                if locked {
+                    Text("PRO")
+                        .font(.system(size: 7, weight: .bold))
+                        .foregroundColor(.orange)
+                }
+                Spacer()
+                Text("\(Int(value.wrappedValue))")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+
+            Slider(value: value, in: range, step: step)
+                .disabled(locked)
         }
+        .padding(.horizontal, 10)
+        .frame(height: 54)
+    }
+
+    private func opacitySliderRow(
+        title: String,
+        value: Binding<Double>,
+        range: ClosedRange<Double>,
+        step: Double
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                Spacer()
+                Text("\(Int(round(value.wrappedValue * 100)))%")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
+            }
+
+            Slider(value: value, in: range, step: step)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 54)
     }
 
     func getLaunchAtLogin() -> Bool {
@@ -489,13 +1055,15 @@ struct GeneralSettingsView: View {
 // MARK: - 快捷键录制
 
 struct HotkeyRecorderRow: View {
-    let appState: AppState
+    @ObservedObject var appState: AppState
     @State private var isRecording = false
-    @State private var monitor: Any?
+    @State private var localMonitor: Any?
+    @State private var globalMonitor: Any?
 
     var body: some View {
         HStack {
             Text("快捷键")
+                .font(.system(size: 12, weight: .medium))
             Spacer()
 
             if isRecording {
@@ -504,12 +1072,10 @@ struct HotkeyRecorderRow: View {
                     .foregroundColor(.accentColor)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6)
-                            .stroke(Color.accentColor, lineWidth: 1)
-                    )
+                    .glassEffect(.regular, in: .capsule)
+                    .transition(.scale(scale: 0.9).combined(with: .opacity))
             } else {
-                Button(action: { startRecording() }) {
+                Button(action: { withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) { startRecording() } }) {
                     HStack(spacing: 2) {
                         ForEach(modifierSymbols, id: \.self) { sym in
                             KeyCap(sym)
@@ -518,8 +1084,12 @@ struct HotkeyRecorderRow: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .transition(.scale(scale: 0.9).combined(with: .opacity))
             }
         }
+        .padding(.horizontal, 10)
+        .frame(height: 38)
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: isRecording)
     }
 
     private var modifierSymbols: [String] {
@@ -533,32 +1103,51 @@ struct HotkeyRecorderRow: View {
     }
 
     private func startRecording() {
+        stopRecording()
+        NSApp.activate(ignoringOtherApps: true)
         isRecording = true
-        monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { event in
-            let mods = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            // 需要至少一个修饰键
-            guard mods.contains(.command) || mods.contains(.control) || mods.contains(.option) else {
-                if event.keyCode == 53 { // Escape 取消
+
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown]) { event in
+            handleKeyEvent(event)
+            return nil
+        }
+
+        globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.keyDown]) { event in
+            handleKeyEvent(event)
+        }
+    }
+
+    private func handleKeyEvent(_ event: NSEvent) {
+        let mods = event.modifierFlags
+            .intersection(.deviceIndependentFlagsMask)
+            .intersection([.command, .control, .option, .shift])
+
+        guard mods.contains(.command) || mods.contains(.control) || mods.contains(.option) else {
+            if event.keyCode == 53 {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
                     stopRecording()
                 }
-                return nil
             }
+            return
+        }
 
-            // 保存新快捷键
-            appState.settings.hotkey = HotkeyConfig(keyCode: event.keyCode, modifiers: mods)
+        appState.settings.hotkey = HotkeyConfig(keyCode: event.keyCode, modifiers: mods)
+        NotificationCenter.default.post(name: .hotkeyChanged, object: nil)
+
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
             stopRecording()
-
-            // 通知 AppDelegate 重新注册
-            NotificationCenter.default.post(name: .hotkeyChanged, object: nil)
-            return nil
         }
     }
 
     private func stopRecording() {
         isRecording = false
-        if let m = monitor {
+        if let m = localMonitor {
             NSEvent.removeMonitor(m)
-            monitor = nil
+            localMonitor = nil
+        }
+        if let m = globalMonitor {
+            NSEvent.removeMonitor(m)
+            globalMonitor = nil
         }
     }
 }
@@ -574,80 +1163,57 @@ struct KeyCap: View {
             .font(.system(size: 12, weight: .medium, design: .rounded))
             .frame(minWidth: 24, minHeight: 22)
             .padding(.horizontal, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(.background)
-                    .shadow(color: .black.opacity(0.12), radius: 0.5, x: 0, y: 0.5)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(.separator, lineWidth: 0.5)
-            )
+            .glassEffect(.regular, in: .rect(cornerRadius: 5))
     }
 }
 
-// MARK: - 关于页
+// MARK: - NSSearchField 包装
 
-struct AboutView: View {
-    var body: some View {
-        VStack(spacing: 24) {
-            Spacer()
+struct SearchField: NSViewRepresentable {
+    @Binding var text: String
+    var placeholder: String
 
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color(red: 0.35, green: 0.58, blue: 1.0),
-                                Color(red: 0.55, green: 0.36, blue: 0.95),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 80, height: 80)
-                    .shadow(color: .blue.opacity(0.25), radius: 12, x: 0, y: 4)
-
-                Image(systemName: "circle.hexagongrid.fill")
-                    .font(.system(size: 36, weight: .medium))
-                    .foregroundStyle(.white)
+    func makeNSView(context: Context) -> NSSearchField {
+        let field = NSSearchField()
+        field.placeholderString = placeholder
+        field.delegate = context.coordinator
+        field.sendsSearchStringImmediately = true
+        // sheet 窗口 IME 修复：激活 app + 让 sheet 成为 key window + 聚焦搜索框
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            NSApp.activate(ignoringOtherApps: true)
+            if let window = field.window {
+                window.makeKey()
+                window.makeFirstResponder(field)
             }
-
-            VStack(spacing: 4) {
-                Text("饼状菜单")
-                    .font(.system(size: 20, weight: .semibold))
-                Text("PieMenu")
-                    .font(.system(size: 13))
-                    .foregroundColor(.secondary)
-                Text("版本 1.0.0")
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-            }
-
-            Divider()
-                .frame(width: 180)
-
-            VStack(alignment: .leading, spacing: 10) {
-                tipRow(icon: "command", text: "按快捷键唤出饼状菜单")
-                tipRow(icon: "cursorarrow.click", text: "点击图标启动或切换应用")
-                tipRow(icon: "cursorarrow.click.2", text: "右键任意位置关闭菜单")
-                tipRow(icon: "gearshape", text: "点击中心齿轮打开设置")
-            }
-
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // 双重保障：延迟再试一次
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            if let window = field.window, window.firstResponder !== field.currentEditor() {
+                NSApp.activate(ignoringOtherApps: true)
+                window.makeKey()
+                window.makeFirstResponder(field)
+            }
+        }
+        return field
     }
 
-    func tipRow(icon: String, text: String) -> some View {
-        HStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.system(size: 12))
-                .foregroundColor(.accentColor)
-                .frame(width: 18, alignment: .center)
-            Text(text)
-                .font(.system(size: 12))
-                .foregroundColor(.secondary)
+    func updateNSView(_ nsView: NSSearchField, context: Context) {
+        if nsView.stringValue != text {
+            nsView.stringValue = text
+        }
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    class Coordinator: NSObject, NSSearchFieldDelegate {
+        let parent: SearchField
+        init(_ parent: SearchField) { self.parent = parent }
+
+        func controlTextDidChange(_ obj: Notification) {
+            guard let field = obj.object as? NSSearchField else { return }
+            parent.text = field.stringValue
         }
     }
 }
@@ -659,6 +1225,97 @@ extension InteractionMode {
         switch self {
         case .hold: return "按住模式（按住快捷键，松开时选择）"
         case .click: return "点击模式（按快捷键弹出，鼠标点击选择）"
+        }
+    }
+}
+
+// MARK: - 升级 Pro
+
+struct UpgradeView: View {
+    @EnvironmentObject var appState: AppState
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("升级到 Pro")
+                .font(.system(size: 20, weight: .bold))
+
+            VStack(alignment: .leading, spacing: 12) {
+                featureRow(icon: "square.grid.3x3.fill", text: "12 个应用槽位（免费版 6 个）")
+                featureRow(icon: "folder.fill", text: "添加文件夹到轮盘")
+                featureRow(icon: "slider.horizontal.3", text: "自定义菜单大小和图标大小")
+                featureRow(icon: "play.circle.fill", text: "音乐播放控制")
+                featureRow(icon: "computermouse.fill", text: "鼠标按键快捷触发")
+            }
+            .padding(.horizontal, 20)
+
+            switch appState.pro.loadState {
+            case .loaded:
+                if let product = appState.pro.product {
+                    Button(action: {
+                        Task { await appState.pro.purchase() }
+                    }) {
+                        HStack {
+                            if appState.pro.purchaseInProgress {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                            Text("购买 Pro — \(product.displayPrice)")
+                                .font(.system(size: 14, weight: .semibold))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(appState.pro.purchaseInProgress)
+                    .padding(.horizontal, 40)
+                }
+            case .loading:
+                ProgressView("加载中...")
+            case .failed(let message):
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                        .font(.system(size: 20))
+                    Text(message)
+                        .font(.system(size: 12))
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.center)
+                    Button("重试") {
+                        Task { await appState.pro.loadProduct() }
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.horizontal, 40)
+            }
+
+            Button("恢复购买") {
+                Task { await appState.pro.restore() }
+            }
+            .buttonStyle(.plain)
+            .font(.system(size: 12))
+            .foregroundColor(.secondary)
+
+            Button("取消") { dismiss() }
+                .buttonStyle(.plain)
+                .font(.system(size: 12))
+                .foregroundColor(.secondary)
+        }
+        .padding(30)
+        .frame(width: 360)
+        .onChange(of: appState.pro.isPro) { isPro in
+            if isPro { dismiss() }
+        }
+    }
+
+    func featureRow(icon: String, text: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: icon)
+                .font(.system(size: 14))
+                .foregroundColor(.orange)
+                .frame(width: 20)
+            Text(text)
+                .font(.system(size: 13))
         }
     }
 }

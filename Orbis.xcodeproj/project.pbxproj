@@ -1,0 +1,358 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		40EC72DEF59E20B75F779A6E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C66EA951F699B885F269E0F /* AppState.swift */; };
+		4E757FA4336E6E6772BF542D /* PieMenuWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A7DA9925139DF25AAFE6FD0 /* PieMenuWindow.swift */; };
+		6093ABD08D3D1D63630A5126 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B9B7592B7974D94EA2CD334 /* SettingsView.swift */; };
+		A14D0611AAF58F4040ABEF2C /* NowPlayingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 745FC00B89CE6484EA954335 /* NowPlayingService.swift */; };
+		AE50F90212589A4ABC5BC8A2 /* PieMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92E80B12E1FA3207843F1DB1 /* PieMenuView.swift */; };
+		AEF4254A342E073607A4398C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 95EE7E816BADDA3D01815954 /* Assets.xcassets */; };
+		B87E35DCCD82CDAC1D04D159 /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82CD0FC227FE8538F3C2E95C /* ProManager.swift */; };
+		D9458CF2B30C0ACCC2967602 /* PieMenuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E8B8128F3E14753737C4F2 /* PieMenuApp.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0A7DA9925139DF25AAFE6FD0 /* PieMenuWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieMenuWindow.swift; sourceTree = "<group>"; };
+		0C66EA951F699B885F269E0F /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		2B9B7592B7974D94EA2CD334 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		62E8B8128F3E14753737C4F2 /* PieMenuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieMenuApp.swift; sourceTree = "<group>"; };
+		745FC00B89CE6484EA954335 /* NowPlayingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingService.swift; sourceTree = "<group>"; };
+		82CD0FC227FE8538F3C2E95C /* ProManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProManager.swift; sourceTree = "<group>"; };
+		92E80B12E1FA3207843F1DB1 /* PieMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PieMenuView.swift; sourceTree = "<group>"; };
+		95EE7E816BADDA3D01815954 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CCD9DCC740DB9A315673D434 /* Orbis.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Orbis.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		6558D0A922C923D510D0E9A0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CCD9DCC740DB9A315673D434 /* Orbis.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9680BAE6EAC5DB0CCB2C1584 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				95EE7E816BADDA3D01815954 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B0860295E1D937C57CFE276A /* PieMenu */ = {
+			isa = PBXGroup;
+			children = (
+				0C66EA951F699B885F269E0F /* AppState.swift */,
+				745FC00B89CE6484EA954335 /* NowPlayingService.swift */,
+				62E8B8128F3E14753737C4F2 /* PieMenuApp.swift */,
+				92E80B12E1FA3207843F1DB1 /* PieMenuView.swift */,
+				0A7DA9925139DF25AAFE6FD0 /* PieMenuWindow.swift */,
+				82CD0FC227FE8538F3C2E95C /* ProManager.swift */,
+				2B9B7592B7974D94EA2CD334 /* SettingsView.swift */,
+			);
+			name = PieMenu;
+			path = Sources/PieMenu;
+			sourceTree = "<group>";
+		};
+		B503CC7166CF0F11C1CCD2F5 = {
+			isa = PBXGroup;
+			children = (
+				B0860295E1D937C57CFE276A /* PieMenu */,
+				9680BAE6EAC5DB0CCB2C1584 /* Resources */,
+				6558D0A922C923D510D0E9A0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA62EB70ECE1F5985CA158B7 /* Orbis */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 564457161A5E6B60EA969C2D /* Build configuration list for PBXNativeTarget "Orbis" */;
+			buildPhases = (
+				6EB43FF2122DA67DF7BBD982 /* Sources */,
+				62B288C795F7E860572B8780 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Orbis;
+			packageProductDependencies = (
+			);
+			productName = Orbis;
+			productReference = CCD9DCC740DB9A315673D434 /* Orbis.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3B40C4C23E7E48E20EE2E210 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					AA62EB70ECE1F5985CA158B7 = {
+						DevelopmentTeam = 9NDTK4FT92;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 2213C524825335C7572A3FE3 /* Build configuration list for PBXProject "Orbis" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B503CC7166CF0F11C1CCD2F5;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 6558D0A922C923D510D0E9A0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA62EB70ECE1F5985CA158B7 /* Orbis */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		62B288C795F7E860572B8780 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AEF4254A342E073607A4398C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6EB43FF2122DA67DF7BBD982 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40EC72DEF59E20B75F779A6E /* AppState.swift in Sources */,
+				A14D0611AAF58F4040ABEF2C /* NowPlayingService.swift in Sources */,
+				D9458CF2B30C0ACCC2967602 /* PieMenuApp.swift in Sources */,
+				AE50F90212589A4ABC5BC8A2 /* PieMenuView.swift in Sources */,
+				4E757FA4336E6E6772BF542D /* PieMenuWindow.swift in Sources */,
+				B87E35DCCD82CDAC1D04D159 /* ProManager.swift in Sources */,
+				6093ABD08D3D1D63630A5126 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		85E4AD2EBA0977663793DA85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Orbis.debug.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9NDTK4FT92;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Arcly;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Arcly. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.qingshan.orbis;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		883C884BA458492079E22B07 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Arcly;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5;
+			};
+			name = Debug;
+		};
+		F4639CEC038218D635A34E49 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Orbis.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9NDTK4FT92;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Arcly;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Arcly. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.qingshan.orbis;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		F7C367DB754FEBD397896818 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = Arcly;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2213C524825335C7572A3FE3 /* Build configuration list for PBXProject "Orbis" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				883C884BA458492079E22B07 /* Debug */,
+				F7C367DB754FEBD397896818 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		564457161A5E6B60EA969C2D /* Build configuration list for PBXNativeTarget "Orbis" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				85E4AD2EBA0977663793DA85 /* Debug */,
+				F4639CEC038218D635A34E49 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 3B40C4C23E7E48E20EE2E210 /* Project object */;
+}

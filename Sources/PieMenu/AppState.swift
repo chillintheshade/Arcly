@@ -5,6 +5,8 @@ import Carbon
 extension Notification.Name {
     static let hotkeyChanged = Notification.Name("PieMenu.hotkeyChanged")
     static let appearanceChanged = Notification.Name("PieMenu.appearanceChanged")
+    static let menuBarIconChanged = Notification.Name("PieMenu.menuBarIconChanged")
+    static let mouseTriggerChanged = Notification.Name("PieMenu.mouseTriggerChanged")
 }
 
 // MARK: - Data Models
@@ -20,15 +22,50 @@ struct AppItem: Identifiable, Codable, Equatable {
     var bundleIdentifier: String
     var path: String
     var itemType: PieItemType = .app
+    var bookmarkData: Data?
+    var customIconData: Data?
 
     /// 缓存版本 — 视图中使用这两个
     var displayName: String { IconCache.shared.displayName(for: self) }
     var icon: NSImage { IconCache.shared.icon(for: self) }
 
+    func resolvedFileURL() -> URL {
+        Self.resolvingAliasIfNeeded(securityScopedFileURL())
+    }
+
+    private func securityScopedFileURL() -> URL {
+        guard itemType == .fileOrFolder, let bookmarkData else {
+            return URL(fileURLWithPath: path)
+        }
+
+        var isStale = false
+        if let url = try? URL(
+            resolvingBookmarkData: bookmarkData,
+            options: [.withSecurityScope],
+            relativeTo: nil,
+            bookmarkDataIsStale: &isStale
+        ) {
+            return url
+        }
+
+        return URL(fileURLWithPath: path)
+    }
+
     /// 实际加载逻辑（仅由 IconCache 调用一次）
     func resolveDisplayName() -> String {
         if itemType == .fileOrFolder {
-            return URL(fileURLWithPath: path).lastPathComponent
+            let url = resolvedFileURL()
+            let didAccess = url.startAccessingSecurityScopedResource()
+            defer {
+                if didAccess { url.stopAccessingSecurityScopedResource() }
+            }
+
+            if let values = try? url.resourceValues(forKeys: [.localizedNameKey]),
+               let localized = values.localizedName,
+               !localized.isEmpty {
+                return localized
+            }
+            return url.lastPathComponent
         }
         if let cn = AppItem.chineseNames[bundleIdentifier] { return cn }
         let url = URL(fileURLWithPath: path)
@@ -46,12 +83,112 @@ struct AppItem: Identifiable, Codable, Equatable {
 
     func loadIcon() -> NSImage {
         if itemType == .fileOrFolder {
-            return NSWorkspace.shared.icon(forFile: path)
+            if let customIconData, let image = NSImage(data: customIconData) {
+                return image
+            }
+
+            let url = resolvedFileURL()
+            _ = url.startAccessingSecurityScopedResource()
+
+            if let customIcon = customIcon(for: url) {
+                return customIcon
+            }
+
+            var isDirectory: ObjCBool = false
+            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
+               isDirectory.boolValue {
+                return NSWorkspace.shared.icon(forFile: url.path)
+            }
+
+            let isAliasFile = (try? url.resourceValues(forKeys: [.isAliasFileKey]).isAliasFile) ?? false
+            if let aliasTarget = try? URL(resolvingAliasFileAt: url),
+               aliasTarget.path != url.path {
+                return NSWorkspace.shared.icon(forFile: aliasTarget.path)
+            }
+
+            if isAliasFile && url.pathExtension.isEmpty {
+                return NSWorkspace.shared.icon(for: .folder)
+            }
+
+            return NSWorkspace.shared.icon(forFile: url.path)
         }
         if let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) {
             return NSWorkspace.shared.icon(forFile: app.path)
         }
         return NSWorkspace.shared.icon(forFile: path)
+    }
+
+    static func persistentCustomIconData(for url: URL) -> Data? {
+        if let data = iconDataFromResourceFork(for: url) {
+            return data
+        }
+
+        var isDirectory: ObjCBool = false
+        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
+           isDirectory.boolValue {
+            let iconFile = url.appendingPathComponent("Icon\r")
+            return iconDataFromResourceFork(for: iconFile)
+        }
+
+        return nil
+    }
+
+    private func customIcon(for url: URL) -> NSImage? {
+        guard let data = Self.persistentCustomIconData(for: url) else { return nil }
+        return NSImage(data: data)
+    }
+
+    private static func resolvingAliasIfNeeded(_ url: URL) -> URL {
+        guard ((try? url.resourceValues(forKeys: [.isAliasFileKey]).isAliasFile) ?? false),
+              let resolvedURL = try? URL(resolvingAliasFileAt: url, options: []) else {
+            return url
+        }
+        return resolvedURL
+    }
+
+    private static func iconDataFromResourceFork(for url: URL) -> Data? {
+        let resourceForkURL = URL(fileURLWithPath: url.path + "/..namedfork/rsrc")
+        guard let data = try? Data(contentsOf: resourceForkURL),
+              data.count >= 8 else { return nil }
+
+        let bytes = [UInt8](data)
+        var offset = 0
+        while offset <= bytes.count - 8 {
+            if bytes[offset] == 0x69, bytes[offset + 1] == 0x63,
+               bytes[offset + 2] == 0x6E, bytes[offset + 3] == 0x73 {
+                let length = Int(bytes[offset + 4]) << 24
+                    | Int(bytes[offset + 5]) << 16
+                    | Int(bytes[offset + 6]) << 8
+                    | Int(bytes[offset + 7])
+                if length >= 8, offset + length <= data.count {
+                    let iconData = data.subdata(in: offset..<(offset + length))
+                    return NSImage(data: iconData) == nil ? nil : iconData
+                }
+            }
+            offset += 1
+        }
+
+        return nil
+    }
+
+    func openFileOrFolder() {
+        let scopedURL = securityScopedFileURL()
+        let didAccessScopedURL = scopedURL.startAccessingSecurityScopedResource()
+        let url = Self.resolvingAliasIfNeeded(scopedURL)
+        let didAccessResolvedURL = url.path == scopedURL.path ? false : url.startAccessingSecurityScopedResource()
+        let config = NSWorkspace.OpenConfiguration()
+        config.activates = true
+        NSWorkspace.shared.open(url, configuration: config) { _, error in
+            if let error {
+                NSLog("❌ 打开文件或文件夹失败: %@", error.localizedDescription)
+            }
+            if didAccessResolvedURL {
+                url.stopAccessingSecurityScopedResource()
+            }
+            if didAccessScopedURL {
+                scopedURL.stopAccessingSecurityScopedResource()
+            }
+        }
     }
 
     var isRunning: Bool {
@@ -189,13 +326,39 @@ struct AppItem: Identifiable, Codable, Equatable {
 }
 
 enum InteractionMode: String, Codable, CaseIterable {
-    case hold = "hold"
     case click = "click"
+    case hold = "hold"
 }
 
 enum MenuPosition: String, Codable, CaseIterable {
     case followMouse = "followMouse"
     case screenCenter = "screenCenter"
+}
+
+enum MouseTrigger: String, Codable, CaseIterable {
+    case none = "none"
+    case middleButton = "middleButton"   // 中键
+    case sideButton1 = "sideButton1"     // 侧键1 (Mouse4)
+    case sideButton2 = "sideButton2"     // 侧键2 (Mouse5)
+
+    var displayName: String {
+        switch self {
+        case .none: return "无"
+        case .middleButton: return "鼠标中键"
+        case .sideButton1: return "侧键1（前进）"
+        case .sideButton2: return "侧键2（后退）"
+        }
+    }
+
+    /// 对应的 NSEvent.buttonNumber
+    var buttonNumber: Int? {
+        switch self {
+        case .none: return nil
+        case .middleButton: return 2
+        case .sideButton1: return 3
+        case .sideButton2: return 4
+        }
+    }
 }
 
 enum AppearanceMode: String, Codable, CaseIterable {
@@ -205,8 +368,8 @@ enum AppearanceMode: String, Codable, CaseIterable {
 }
 
 struct HotkeyConfig: Codable {
-    var keyCode: UInt16 = 2 // D key
-    var modifiers: NSEvent.ModifierFlags = [.command, .shift]
+    var keyCode: UInt16 = 50 // key left of 1
+    var modifiers: NSEvent.ModifierFlags = [.command]
 
     var displayString: String {
         var parts: [String] = []
@@ -240,7 +403,7 @@ struct HotkeyConfig: Codable {
             22: "6", 26: "7", 28: "8", 25: "9", 29: "0",
             24: "=", 27: "-", 30: "]", 33: "[", 39: "'",
             41: ";", 42: "\\", 43: ",", 44: "/", 47: ".",
-            50: "`", 76: "Enter",
+            50: "·", 76: "Enter",
             122: "F1", 120: "F2", 99: "F3", 118: "F4",
             96: "F5", 97: "F6", 98: "F7", 100: "F8",
             101: "F9", 109: "F10", 103: "F11", 111: "F12",
@@ -248,12 +411,29 @@ struct HotkeyConfig: Codable {
         return keyMap[keyCode] ?? "Key\(keyCode)"
     }
 
+    var menuKeyEquivalent: String {
+        switch keyCode {
+        case 49: return " "
+        case 36, 76: return "\r"
+        case 48: return "\t"
+        case 51: return "\u{8}"
+        case 53: return "\u{1b}"
+        default:
+            let label = Self.keyCodeToString(keyCode)
+            return label.count == 1 ? label.lowercased() : ""
+        }
+    }
+
+    var menuModifierMask: NSEvent.ModifierFlags {
+        modifiers.intersection([.command, .shift, .option, .control])
+    }
+
     // Codable conformance for NSEvent.ModifierFlags
     enum CodingKeys: String, CodingKey {
         case keyCode, rawModifiers
     }
 
-    init(keyCode: UInt16 = 2, modifiers: NSEvent.ModifierFlags = [.command, .shift]) {
+    init(keyCode: UInt16 = 50, modifiers: NSEvent.ModifierFlags = [.command]) {
         self.keyCode = keyCode
         self.modifiers = modifiers
     }
@@ -278,11 +458,36 @@ struct AppSettings: Codable {
     var hotkey: HotkeyConfig = HotkeyConfig()
     var menuRadius: Double = 140
     var iconSize: Double = 48
+    var menuOpacity: Double = 1.0
     var menuPosition: MenuPosition = .followMouse
     var appearanceMode: AppearanceMode = .system
     var hapticFeedback: Bool = true
     var soundEffects: Bool = true
+    var showMenuBarIcon: Bool = true
+    var showMusicControl: Bool = true
+    var mouseTrigger: MouseTrigger = .none
     var hasCompletedOnboarding: Bool = false
+
+    // 自定义 decoder：新增字段缺失时用默认值，兼容旧版 settings.json
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        apps = (try? c.decode([AppItem].self, forKey: .apps)) ?? []
+        interactionMode = (try? c.decode(InteractionMode.self, forKey: .interactionMode)) ?? .click
+        hotkey = (try? c.decode(HotkeyConfig.self, forKey: .hotkey)) ?? HotkeyConfig()
+        menuRadius = (try? c.decode(Double.self, forKey: .menuRadius)) ?? 140
+        iconSize = (try? c.decode(Double.self, forKey: .iconSize)) ?? 48
+        menuOpacity = (try? c.decode(Double.self, forKey: .menuOpacity)) ?? 1.0
+        menuPosition = (try? c.decode(MenuPosition.self, forKey: .menuPosition)) ?? .followMouse
+        appearanceMode = (try? c.decode(AppearanceMode.self, forKey: .appearanceMode)) ?? .system
+        hapticFeedback = (try? c.decode(Bool.self, forKey: .hapticFeedback)) ?? true
+        soundEffects = (try? c.decode(Bool.self, forKey: .soundEffects)) ?? true
+        showMenuBarIcon = (try? c.decode(Bool.self, forKey: .showMenuBarIcon)) ?? true
+        showMusicControl = (try? c.decode(Bool.self, forKey: .showMusicControl)) ?? true
+        mouseTrigger = (try? c.decode(MouseTrigger.self, forKey: .mouseTrigger)) ?? .none
+        hasCompletedOnboarding = (try? c.decode(Bool.self, forKey: .hasCompletedOnboarding)) ?? false
+    }
+
+    init() {}
 }
 
 // MARK: - Icon Cache
@@ -292,17 +497,23 @@ final class IconCache {
     private var cache: [String: NSImage] = [:]
     private var nameCache: [String: String] = [:]
 
+    private func cacheKey(for app: AppItem) -> String {
+        app.itemType == .fileOrFolder ? app.path : app.bundleIdentifier
+    }
+
     func icon(for app: AppItem) -> NSImage {
-        if let img = cache[app.bundleIdentifier] { return img }
+        let key = cacheKey(for: app)
+        if let img = cache[key] { return img }
         let img = app.loadIcon()
-        cache[app.bundleIdentifier] = img
+        cache[key] = img
         return img
     }
 
     func displayName(for app: AppItem) -> String {
-        if let name = nameCache[app.bundleIdentifier] { return name }
+        let key = cacheKey(for: app)
+        if let name = nameCache[key] { return name }
         let name = app.resolveDisplayName()
-        nameCache[app.bundleIdentifier] = name
+        nameCache[key] = name
         return name
     }
 
@@ -320,6 +531,8 @@ class AppState: ObservableObject {
     }
     @Published var selectedIndex: Int? = nil
     @Published var isMenuVisible: Bool = false
+    let nowPlaying = NowPlayingService()
+    let pro = ProManager.shared
 
     private let settingsURL: URL = {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -333,7 +546,11 @@ class AppState: ObservableObject {
            var decoded = try? JSONDecoder().decode(AppSettings.self, from: data) {
             // 迁移：修复旧版保存的无效快捷键（⌥Space）
             if decoded.hotkey.keyCode == 49 && decoded.hotkey.modifiers == .option {
-                decoded.hotkey = HotkeyConfig() // 重置为默认 ⌘⇧D
+                decoded.hotkey = HotkeyConfig() // 重置为默认 ⌘·
+            }
+            // 迁移：如果用户仍使用旧默认 ⌘⇧D，切换到新的默认 ⌘·。
+            if decoded.hotkey.keyCode == 2 && decoded.hotkey.modifiers == [.command, .shift] {
+                decoded.hotkey = HotkeyConfig() // 重置为默认 ⌘·
             }
             self.settings = decoded
         } else {

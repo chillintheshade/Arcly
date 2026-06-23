@@ -1,3 +1,30 @@
 .DS_Store
 .build/
 .swiftpm/
+
+# Xcode local state
+xcuserdata/
+*.xcuserstate
+DerivedData/
+*.xcarchive
+*.dSYM
+
+# Local build outputs and installers
+build/
+Products/
+*.app
+*.dmg
+*.pkg
+*.zip
+
+# Local credentials / environment
+.env
+.env.*
+*.p12
+*.cer
+*.mobileprovision
+*.provisionprofile
+*.pem
+
+# Codex/local design scratch
+.superpowers/

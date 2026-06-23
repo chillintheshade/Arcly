@@ -1,13 +1,16 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
     name: "PieMenu",
-    platforms: [.macOS(.v13)],
+    platforms: [.macOS(.v26)],
     targets: [
         .executableTarget(
             name: "PieMenu",
-            path: "Sources/PieMenu"
+            path: "Sources/PieMenu",
+            swiftSettings: [
+                .swiftLanguageMode(.v5)
+            ]
         )
     ]
 )

@@ -42,6 +42,24 @@ class PieMenuWindow: NSWindow {
     var onOpenSettings: (() -> Void)?
 
     private let windowSize: CGFloat = PieMenuView.windowSize
+    private let centerControlHitRadius: CGFloat = 96
+    private var centerLensRadius: CGFloat {
+        let innerRadius = appState.settings.menuRadius - 50
+        let maxRadiusBeforeIcons = appState.settings.menuRadius - appState.settings.iconSize / 2 - 10
+        return min(max(innerRadius, 66), maxRadiusBeforeIcons)
+    }
+    private var centerMusicControlScale: CGFloat {
+        let radiusScale = min(max(appState.settings.menuRadius / 130, 0.88), 1.42)
+        let availableScale = (centerLensRadius * 2 - 18) / 142
+        return min(radiusScale, max(0.68, availableScale))
+    }
+
+    private enum CenterClickAction {
+        case openSettings
+        case previousTrack
+        case togglePlayPause
+        case nextTrack
+    }
 
     // AVAudioPlayer 预缓冲，play() 近乎零延迟
     private static let tickPlayers: [AVAudioPlayer] = {
@@ -75,10 +93,12 @@ class PieMenuWindow: NSWindow {
         self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         self.acceptsMouseMovedEvents = true
 
-        let menuView = PieMenuView(appState: appState) { [weak self] app in
+        let menuView = PieMenuView(appState: appState, onAppSelected: { [weak self] app in
             self?.launchApp(app)
             self?.dismiss()
-        }
+        }, onSettingsTapped: { [weak self] in
+            self?.dismissForSettings()
+        })
         let hosting = DropTargetHostingView(rootView: menuView)
         hosting.pieWindow = self
         hosting.frame = NSRect(x: 0, y: 0, width: size, height: size)
@@ -108,15 +128,21 @@ class PieMenuWindow: NSWindow {
 
         self.setFrameOrigin(NSPoint(x: x, y: y))
         self.appState.selectedIndex = nil
-        self.appState.isMenuVisible = true
+        self.appState.isMenuVisible = false
         self.makeKeyAndOrderFront(nil)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            withAnimation(MenuMotion.menuAnimation(isVisible: true)) {
+                self.appState.isMenuVisible = true
+            }
+        }
 
         // Mouse movement - global
-        mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { [weak self] event in
+        mouseMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged, .otherMouseDragged]) { [weak self] event in
             self?.updateSelection()
         }
         // Mouse movement - local (when mouse is over our window)
-        localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged]) { [weak self] event in
+        localMouseMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved, .leftMouseDragged, .otherMouseDragged]) { [weak self] event in
             self?.updateSelection()
             return event
         }
@@ -129,20 +155,30 @@ class PieMenuWindow: NSWindow {
         localClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown]) { [weak self] event in
             guard let self = self else { return nil }
 
-            // 检查是否点击了中心区域（设置按钮）
             let mouseLocation = NSEvent.mouseLocation
             let center = NSPoint(x: self.frame.midX, y: self.frame.midY)
             let dx = mouseLocation.x - center.x
             let dy = mouseLocation.y - center.y
             let distance = sqrt(dx * dx + dy * dy)
+            NSLog("🖱️ Click: mouse=(%.0f,%.0f) center=(%.0f,%.0f) dist=%.1f",
+                  mouseLocation.x, mouseLocation.y, center.x, center.y, distance)
 
-            let innerRadius = self.appState.settings.menuRadius - 50
-            if distance < innerRadius {
-                // 点击中心 → 打开设置
-                self.dismiss()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                    self.onOpenSettings?()
+            if let action = self.centerClickAction(dx: dx, dy: dy, distance: distance) {
+                let np = self.appState.nowPlaying
+                switch action {
+                case .openSettings:
+                    self.dismissForSettings()
+                case .previousTrack:
+                    np.previousTrack()
+                case .togglePlayPause:
+                    np.togglePlayPause()
+                case .nextTrack:
+                    np.nextTrack()
                 }
+                return nil
+            }
+
+            if self.isInsideCenterControls(dx: dx, dy: dy, distance: distance) {
                 return nil
             }
 
@@ -198,7 +234,8 @@ class PieMenuWindow: NSWindow {
         let outerRadius = appState.settings.menuRadius + 50
 
         let newIndex: Int?
-        if distance < innerRadius || distance > outerRadius {
+        if isInsideCenterControls(dx: dx, dy: dy, distance: distance)
+            || distance < innerRadius || distance > outerRadius {
             newIndex = nil
         } else {
             var angle = atan2(dy, dx)
@@ -252,7 +289,8 @@ class PieMenuWindow: NSWindow {
         let outerRadius = appState.settings.menuRadius + 50
 
         let newIndex: Int?
-        if distance < innerRadius || distance > outerRadius {
+        if isInsideCenterControls(dx: dx, dy: dy, distance: distance)
+            || distance < innerRadius || distance > outerRadius {
             newIndex = nil
         } else {
             var angle = atan2(dy, dx)
@@ -323,6 +361,39 @@ class PieMenuWindow: NSWindow {
         }
     }
 
+    private func isInsideCenterControls(dx: CGFloat, dy: CGFloat, distance: CGFloat) -> Bool {
+        if appState.nowPlaying.hasNowPlaying && appState.settings.showMusicControl {
+            let scale = centerMusicControlScale
+            return distance <= centerControlHitRadius * scale
+                && abs(dx) <= 90 * scale
+                && dy >= -96 * scale
+                && dy <= 72 * scale
+        }
+
+        return distance <= 64 * centerMusicControlScale
+    }
+
+    private func centerClickAction(dx: CGFloat, dy: CGFloat, distance: CGFloat) -> CenterClickAction? {
+        guard isInsideCenterControls(dx: dx, dy: dy, distance: distance) else { return nil }
+
+        if appState.nowPlaying.hasNowPlaying && appState.settings.showMusicControl {
+            let scale = centerMusicControlScale
+            if abs(dx) <= 34 * scale && dy >= -96 * scale && dy <= -50 * scale {
+                return .openSettings
+            }
+
+            if appState.pro.canControlMusic && dy >= -58 * scale && dy <= -16 * scale {
+                if dx < -24 * scale { return .previousTrack }
+                if dx > 24 * scale { return .nextTrack }
+                return .togglePlayPause
+            }
+
+            return nil
+        }
+
+        return .openSettings
+    }
+
     func activateSelected() {
         guard let index = appState.selectedIndex,
               index < appState.settings.apps.count else { return }
@@ -333,7 +404,7 @@ class PieMenuWindow: NSWindow {
     func launchApp(_ app: AppItem) {
         if app.itemType == .fileOrFolder {
             NSLog("📂 Opening: %@", app.path)
-            NSWorkspace.shared.open(URL(fileURLWithPath: app.path))
+            app.openFileOrFolder()
             return
         }
 
@@ -358,12 +429,25 @@ class PieMenuWindow: NSWindow {
         removeMonitors()
 
         // 触发关闭动画
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+        withAnimation(MenuMotion.menuAnimation(isVisible: false)) {
             appState.isMenuVisible = false
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + MenuMotion.dismissOrderOutDelay) { [weak self] in
             self?.orderOut(nil)
             self?.onDismiss?()
+        }
+    }
+
+    /// 立即关闭（无动画），然后打开设置 — 确保设置窗口能拿到焦点
+    func dismissForSettings() {
+        let openSettings = onOpenSettings // 先捕获，防止 onDismiss 释放 self 后丢失
+        appState.selectedIndex = nil
+        appState.isMenuVisible = false
+        removeMonitors()
+        orderOut(nil)
+        onDismiss?()
+        DispatchQueue.main.async {
+            openSettings?()
         }
     }
 

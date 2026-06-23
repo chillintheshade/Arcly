@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 2880px; height: 1800px; overflow: hidden;
+    font-family: -apple-system, "PingFang SC", sans-serif;
+    -webkit-font-smoothing: antialiased; }
+  body {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(99,102,241,.35), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 85% 85%, rgba(236,72,153,.3), transparent 60%),
+      linear-gradient(135deg, #0a0a14 0%, #151528 50%, #0f0f1e 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .eyebrow { font-size: 42px; font-weight: 500; letter-spacing: .3em;
+    text-transform: uppercase; color: rgba(255,255,255,.55); margin-bottom: 40px; }
+  h1 { font-size: 200px; font-weight: 800; letter-spacing: -.03em; line-height: 1;
+    text-align: center; margin-bottom: 50px;
+    background: linear-gradient(180deg, #fff 0%, #c7c7e0 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { font-size: 56px; font-weight: 400; color: rgba(255,255,255,.7);
+    text-align: center; max-width: 2200px; line-height: 1.4; margin-bottom: 100px; }
+  .shell { width: 2200px; aspect-ratio: 16/10; background: #1a1a2e; border-radius: 28px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.1),
+      0 120px 200px -40px rgba(0,0,0,.8),
+      0 60px 120px -30px rgba(99,102,241,.3);
+    overflow: hidden; position: relative; }
+  .bar { height: 56px; background: linear-gradient(180deg, #2a2a3e 0%, #1f1f32 100%);
+    display: flex; align-items: center; padding: 0 24px; gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,.05); }
+  .dot { width: 16px; height: 16px; border-radius: 50%; }
+  .r { background: #ff5f57; } .y { background: #febc2e; } .g { background: #28c840; }
+  .shot { position: absolute; inset: 56px 0 0 0;
+    background: url("raw/orbis-1.png") center/contain no-repeat, #0f0f1e; }
+</style>
+</head>
+<body>
+  <div class="eyebrow">ORBIS FOR MACOS</div>
+  <h1>一键呼出，专注当下</h1>
+  <div class="subtitle">按下快捷键，常用 App 以环形排列出现在鼠标周围</div>
+  <div class="shell">
+    <div class="bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div></div>
+    <div class="shot"></div>
+  </div>
+</body>
+</html>
