@@ -141,6 +141,6 @@ def generate_screenshot(raw_filename, headline, subline, output_filename):
 if __name__ == "__main__":
     print("生成 App Store 营销截图...")
     for i, (raw, headline, subline) in enumerate(CONFIGS):
-        output = f"orbis_screenshot_{i+1}.png"
+        output = f"arcly_screenshot_{i+1}.png"
         generate_screenshot(raw, headline, subline, output)
     print(f"\n完成！输出目录：{OUT_DIR}")

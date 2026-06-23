@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PIE_VIEW = ROOT / "Sources" / "PieMenu" / "PieMenuView.swift"
+PIE_VIEW = ROOT / "Sources" / "Arcly" / "ArclyWheelView.swift"
 
 
 def main() -> None:

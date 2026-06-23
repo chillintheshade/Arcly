@@ -1,0 +1,388 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		06174937063A76E2E7B94AEC /* ArclyWheelWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6646241D8B0C2809F35B24B1 /* ArclyWheelWindow.swift */; };
+		2F264C1A060775E6FCC16E11 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38B1F7055A4E3824231BF5F2 /* SettingsView.swift */; };
+		3E534ADEF6A5A3466DDDF1F2 /* ArclyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5FDEEAD4F36FDB9566081569 /* ArclyApp.swift */; };
+		605EB45818DFE97AAE401328 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F178F459E700420FF442E67C /* AppState.swift */; };
+		62685DCCE0319F160908360D /* NowPlayingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB50646A3799BBF8742A9035 /* NowPlayingService.swift */; };
+		692EC51280400B6C71C695B5 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5D31D4D6A1F81AF4D7C3CEF1 /* Localizable.strings */; };
+		82ADD7685570705B5324D884 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0209F6453CA4A9038EC2756D /* Localization.swift */; };
+		A55BEB013261E50F5018A484 /* ProManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF00731CD15B91E007634C44 /* ProManager.swift */; };
+		BB786583CF28C88E39FD64AD /* ArclyWheelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CCC58C5166E5E21FD3F7370 /* ArclyWheelView.swift */; };
+		D550002352C14DEDD05F683D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2509BA34D2DF2BF7165A7218 /* Assets.xcassets */; };
+		F411CE2C74630226A3DB6820 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = C26FE4FEFD4D226D62582EBF /* Localizable.strings */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0209F6453CA4A9038EC2756D /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		2509BA34D2DF2BF7165A7218 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		38B1F7055A4E3824231BF5F2 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		5D31D4D6A1F81AF4D7C3CEF1 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		5FDEEAD4F36FDB9566081569 /* ArclyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArclyApp.swift; sourceTree = "<group>"; };
+		6646241D8B0C2809F35B24B1 /* ArclyWheelWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArclyWheelWindow.swift; sourceTree = "<group>"; };
+		6CCC58C5166E5E21FD3F7370 /* ArclyWheelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArclyWheelView.swift; sourceTree = "<group>"; };
+		7EAB55BC049D80C232C24E55 /* Arcly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Arcly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C26FE4FEFD4D226D62582EBF /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		DB50646A3799BBF8742A9035 /* NowPlayingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingService.swift; sourceTree = "<group>"; };
+		DF00731CD15B91E007634C44 /* ProManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProManager.swift; sourceTree = "<group>"; };
+		F178F459E700420FF442E67C /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		357A66A6B9863334E74913C6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7EAB55BC049D80C232C24E55 /* Arcly.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		361585A4A3517FDDC41BF07D /* en.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				C26FE4FEFD4D226D62582EBF /* Localizable.strings */,
+			);
+			name = en.lproj;
+			path = Resources/en.lproj;
+			sourceTree = "<group>";
+		};
+		5275823F9F4E8A41B4D09398 /* Arcly */ = {
+			isa = PBXGroup;
+			children = (
+				F178F459E700420FF442E67C /* AppState.swift */,
+				5FDEEAD4F36FDB9566081569 /* ArclyApp.swift */,
+				6CCC58C5166E5E21FD3F7370 /* ArclyWheelView.swift */,
+				6646241D8B0C2809F35B24B1 /* ArclyWheelWindow.swift */,
+				0209F6453CA4A9038EC2756D /* Localization.swift */,
+				DB50646A3799BBF8742A9035 /* NowPlayingService.swift */,
+				DF00731CD15B91E007634C44 /* ProManager.swift */,
+				38B1F7055A4E3824231BF5F2 /* SettingsView.swift */,
+			);
+			name = Arcly;
+			path = Sources/Arcly;
+			sourceTree = "<group>";
+		};
+		69AAC864BFE157B9DC4BC4EC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2509BA34D2DF2BF7165A7218 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D39732A4435E1CEA3E6E383D = {
+			isa = PBXGroup;
+			children = (
+				5275823F9F4E8A41B4D09398 /* Arcly */,
+				361585A4A3517FDDC41BF07D /* en.lproj */,
+				69AAC864BFE157B9DC4BC4EC /* Resources */,
+				DDDD1AC3B28AD1E5A8B1BF54 /* zh-Hans.lproj */,
+				357A66A6B9863334E74913C6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		DDDD1AC3B28AD1E5A8B1BF54 /* zh-Hans.lproj */ = {
+			isa = PBXGroup;
+			children = (
+				5D31D4D6A1F81AF4D7C3CEF1 /* Localizable.strings */,
+			);
+			name = "zh-Hans.lproj";
+			path = "Resources/zh-Hans.lproj";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2363AD2CBE48F14A41F567D4 /* Arcly */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04279E1B64DE4000EF97C5C1 /* Build configuration list for PBXNativeTarget "Arcly" */;
+			buildPhases = (
+				8A9FDF15284B1C228B17B3C6 /* Sources */,
+				CD1E0A40470868B71959783B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Arcly;
+			packageProductDependencies = (
+			);
+			productName = Arcly;
+			productReference = 7EAB55BC049D80C232C24E55 /* Arcly.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6A5D1CE8BF0DC03C88CDD07B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2640;
+				TargetAttributes = {
+					2363AD2CBE48F14A41F567D4 = {
+						DevelopmentTeam = 9NDTK4FT92;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = DB8D6EE60CD5C4115812E292 /* Build configuration list for PBXProject "Arcly" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D39732A4435E1CEA3E6E383D;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 357A66A6B9863334E74913C6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				2363AD2CBE48F14A41F567D4 /* Arcly */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CD1E0A40470868B71959783B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D550002352C14DEDD05F683D /* Assets.xcassets in Resources */,
+				F411CE2C74630226A3DB6820 /* Localizable.strings in Resources */,
+				692EC51280400B6C71C695B5 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8A9FDF15284B1C228B17B3C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				605EB45818DFE97AAE401328 /* AppState.swift in Sources */,
+				3E534ADEF6A5A3466DDDF1F2 /* ArclyApp.swift in Sources */,
+				BB786583CF28C88E39FD64AD /* ArclyWheelView.swift in Sources */,
+				06174937063A76E2E7B94AEC /* ArclyWheelWindow.swift in Sources */,
+				82ADD7685570705B5324D884 /* Localization.swift in Sources */,
+				62685DCCE0319F160908360D /* NowPlayingService.swift in Sources */,
+				A55BEB013261E50F5018A484 /* ProManager.swift in Sources */,
+				2F264C1A060775E6FCC16E11 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		06EC6F8739DFF7D38780E0D0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = Arcly;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5;
+			};
+			name = Debug;
+		};
+		2B65D90A475DD23E9560CED7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 2;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = Arcly;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5;
+			};
+			name = Release;
+		};
+		378E40155E9793342743DB09 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Arcly.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9NDTK4FT92;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Arcly;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Arcly. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.qingshan.orbis;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		92EBB527FCE905C1E160DCA5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Arcly.debug.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = 9NDTK4FT92;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Arcly;
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 Arcly. All rights reserved.";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.qingshan.orbis;
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		04279E1B64DE4000EF97C5C1 /* Build configuration list for PBXNativeTarget "Arcly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				92EBB527FCE905C1E160DCA5 /* Debug */,
+				378E40155E9793342743DB09 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DB8D6EE60CD5C4115812E292 /* Build configuration list for PBXProject "Arcly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06EC6F8739DFF7D38780E0D0 /* Debug */,
+				2B65D90A475DD23E9560CED7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6A5D1CE8BF0DC03C88CDD07B /* Project object */;
+}

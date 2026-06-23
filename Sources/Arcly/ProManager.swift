@@ -70,11 +70,11 @@ class ProManager: ObservableObject {
                 loadState = .loaded
             } else {
                 product = nil
-                loadState = .failed("商品暂时不可用，请稍后重试")
+                loadState = .failed(Loc.string("pro.productUnavailable"))
             }
         } catch is CancellationError {
             product = nil
-            loadState = .failed("加载超时，请检查网络后重试")
+            loadState = .failed(Loc.string("pro.loadingTimeout"))
         } catch {
             product = nil
             loadState = .failed(error.localizedDescription)

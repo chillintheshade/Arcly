@@ -2,7 +2,7 @@
 
 ## Goal
 
-Add liquid-feel motion to Orbis without changing the current liquid-glass material.
+Add liquid-feel motion to Arcly without changing the current liquid-glass material.
 
 ## Approved Direction
 
@@ -29,6 +29,6 @@ Use the existing glass layers, icon layout, center content, and hit testing. The
 
 ## Files
 
-- `Sources/PieMenu/PieMenuView.swift`: visual motion only.
-- `Sources/PieMenu/PieMenuWindow.swift`: keep dismiss delay aligned with the new close animation if needed.
-- `work/orbis-liquid-motion-contract-test.py`: lightweight source contract check for the motion boundary.
+- `Sources/Arcly/ArclyWheelView.swift`: visual motion only.
+- `Sources/Arcly/ArclyWheelWindow.swift`: keep dismiss delay aligned with the new close animation if needed.
+- `work/arcly-liquid-motion-contract-test.py`: lightweight source contract check for the motion boundary.

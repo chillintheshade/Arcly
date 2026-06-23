@@ -4,7 +4,7 @@ import Carbon
 import ServiceManagement
 
 @main
-enum PieMenuEntry {
+enum ArclyEntry {
     static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()
@@ -16,7 +16,7 @@ enum PieMenuEntry {
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var statusItem: NSStatusItem!
     var appState = AppState()
-    var pieWindow: PieMenuWindow?
+    var wheelWindow: ArclyWheelWindow?
     var settingsWindow: NSWindow?
     var hotKeyRef: EventHotKeyRef?
     var isMenuOpen = false
@@ -27,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var mouseEventRunLoopSource: CFRunLoopSource?
 
     private var showMenuTitle: String {
-        "显示 Arcly"
+        Loc.string("menu.show")
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -65,7 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // 注册鼠标按键触发
         setupMouseTrigger()
 
-        NSLog("✅ 饼状菜单已启动！按 %@ 打开菜单", appState.settings.hotkey.displayString)
+        NSLog("✅ 轮盘已启动！按 %@ 打开菜单", appState.settings.hotkey.displayString)
 
         // 首次启动引导
         if !appState.settings.hasCompletedOnboarding {
@@ -77,19 +77,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func showOnboarding() {
         let alert = NSAlert()
-        alert.messageText = "欢迎使用 Arcly！"
-        alert.informativeText = """
-        快速上手：
-        1. 按 \(appState.settings.hotkey.displayString) 唤出轮盘菜单
-        2. 移动鼠标到目标应用，点击即可启动
-        3. 右键或按 Esc 关闭菜单
-        4. 点击菜单栏图标打开设置
-
-        提示：需要授权「辅助功能」权限才能使用全局快捷键。
-        """
+        alert.messageText = Loc.string("onboarding.title")
+        alert.informativeText = Loc.string("onboarding.body", appState.settings.hotkey.displayString)
         alert.alertStyle = .informational
-        alert.addButton(withTitle: "开始使用")
-        alert.addButton(withTitle: "打开辅助功能设置")
+        alert.addButton(withTitle: Loc.string("onboarding.start"))
+        alert.addButton(withTitle: Loc.string("onboarding.openAccessibility"))
 
         let response = alert.runModal()
         if response == .alertSecondButtonReturn {
@@ -101,7 +93,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // 首次启动弹出轮盘，让用户直观看到效果
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.showPieMenu()
+            self.showArcly()
         }
     }
 
@@ -201,9 +193,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard buttonNumber == appState.settings.mouseTrigger.buttonNumber else { return }
 
         if appState.settings.interactionMode == .hold {
-            if !isMenuOpen { showPieMenu() }
+            if !isMenuOpen { showArcly() }
         } else {
-            togglePieMenu()
+            toggleArcly()
         }
     }
 
@@ -217,9 +209,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if let index = appState.selectedIndex,
            index < appState.settings.apps.count {
             let app = appState.settings.apps[index]
-            closePieMenu()
+            closeArcly()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.pieWindow?.launchApp(app) ?? {
+                self.wheelWindow?.launchApp(app) ?? {
                     if app.itemType == .fileOrFolder {
                         app.openFileOrFolder()
                     } else if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleIdentifier) {
@@ -230,7 +222,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 }()
             }
         } else {
-            closePieMenu()
+            closeArcly()
         }
     }
 
@@ -246,7 +238,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     @objc func appearanceDidChange() {
-        pieWindow?.applyAppearance()
+        wheelWindow?.applyAppearance()
         applySettingsAppearance()
     }
 
@@ -259,10 +251,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
     }
 
-    // 点 Dock 图标时弹饼状菜单
+    // 点 Dock 图标时弹轮盘
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            showPieMenu()
+            showArcly()
         }
         return false
     }
@@ -273,14 +265,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
         let dockMenu = NSMenu()
 
-        let showItem = NSMenuItem(title: showMenuTitle, action: #selector(manualShowPieMenu), keyEquivalent: "")
+        let showItem = NSMenuItem(title: showMenuTitle, action: #selector(manualShowArcly), keyEquivalent: "")
         configureShowMenuItem(showItem)
         showItem.target = self
         dockMenu.addItem(showItem)
 
         dockMenu.addItem(NSMenuItem.separator())
 
-        let settingsItem = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: "")
+        let settingsItem = NSMenuItem(title: Loc.string("menu.settings"), action: #selector(openSettings), keyEquivalent: "")
         settingsItem.target = self
         dockMenu.addItem(settingsItem)
 
@@ -295,27 +287,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // App 菜单
         let appMenuItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(NSMenuItem(title: "退出 Arcly", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        appMenu.addItem(NSMenuItem(title: Loc.string("menu.quit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         appMenuItem.submenu = appMenu
         mainMenu.addItem(appMenuItem)
 
         // File 菜单 — Cmd+W 关闭窗口
         let fileMenuItem = NSMenuItem()
-        let fileMenu = NSMenu(title: "文件")
-        fileMenu.addItem(NSMenuItem(title: "关闭窗口", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
+        let fileMenu = NSMenu(title: Loc.string("menu.file"))
+        fileMenu.addItem(NSMenuItem(title: Loc.string("menu.closeWindow"), action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"))
         fileMenuItem.submenu = fileMenu
         mainMenu.addItem(fileMenuItem)
 
         // Edit 菜单 — IME 输入法 + 剪切板
         let editMenuItem = NSMenuItem()
-        let editMenu = NSMenu(title: "编辑")
-        editMenu.addItem(NSMenuItem(title: "撤销", action: Selector(("undo:")), keyEquivalent: "z"))
-        editMenu.addItem(NSMenuItem(title: "重做", action: Selector(("redo:")), keyEquivalent: "Z"))
+        let editMenu = NSMenu(title: Loc.string("menu.edit"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.undo"), action: Selector(("undo:")), keyEquivalent: "z"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.redo"), action: Selector(("redo:")), keyEquivalent: "Z"))
         editMenu.addItem(NSMenuItem.separator())
-        editMenu.addItem(NSMenuItem(title: "剪切", action: #selector(NSText.cut(_:)), keyEquivalent: "x"))
-        editMenu.addItem(NSMenuItem(title: "拷贝", action: #selector(NSText.copy(_:)), keyEquivalent: "c"))
-        editMenu.addItem(NSMenuItem(title: "粘贴", action: #selector(NSText.paste(_:)), keyEquivalent: "v"))
-        editMenu.addItem(NSMenuItem(title: "全选", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.cut"), action: #selector(NSText.cut(_:)), keyEquivalent: "x"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.copy"), action: #selector(NSText.copy(_:)), keyEquivalent: "c"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.paste"), action: #selector(NSText.paste(_:)), keyEquivalent: "v"))
+        editMenu.addItem(NSMenuItem(title: Loc.string("menu.selectAll"), action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
         editMenuItem.submenu = editMenu
         mainMenu.addItem(editMenuItem)
 
@@ -341,20 +333,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let menu = NSMenu()
 
-        let showItem = NSMenuItem(title: showMenuTitle, action: #selector(manualShowPieMenu), keyEquivalent: "")
+        let showItem = NSMenuItem(title: showMenuTitle, action: #selector(manualShowArcly), keyEquivalent: "")
         configureShowMenuItem(showItem)
         showItem.target = self
         menu.addItem(showItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        let settingsItem = NSMenuItem(title: "设置…", action: #selector(openSettings), keyEquivalent: ",")
+        let settingsItem = NSMenuItem(title: Loc.string("menu.settings"), action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        let quitItem = NSMenuItem(title: "退出 Arcly", action: #selector(quitApp), keyEquivalent: "q")
+        let quitItem = NSMenuItem(title: Loc.string("menu.quit"), action: #selector(quitApp), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
 
@@ -436,11 +428,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         if appState.settings.interactionMode == .hold {
             // 按住模式：按下 → 显示菜单
             if !isMenuOpen {
-                showPieMenu()
+                showArcly()
             }
         } else {
             // 点击模式：按下 → 切换菜单
-            togglePieMenu()
+            toggleArcly()
         }
     }
 
@@ -450,10 +442,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             if let index = appState.selectedIndex,
                index < appState.settings.apps.count {
                 let app = appState.settings.apps[index]
-                closePieMenu()
+                closeArcly()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    self.pieWindow?.launchApp(app) ?? {
-                        // pieWindow 已关闭，直接启动
+                    self.wheelWindow?.launchApp(app) ?? {
+                        // wheelWindow 已关闭，直接启动
                         if app.itemType == .fileOrFolder {
                             app.openFileOrFolder()
                         } else if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleIdentifier) {
@@ -464,59 +456,59 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                     }()
                 }
             } else {
-                closePieMenu()
+                closeArcly()
             }
         }
     }
 
-    // MARK: - 饼状菜单操作
+    // MARK: - 轮盘操作
 
-    func togglePieMenu() {
+    func toggleArcly() {
         if isMenuOpen {
-            closePieMenu()
+            closeArcly()
         } else {
-            showPieMenu()
+            showArcly()
         }
     }
 
-    func showPieMenu() {
+    func showArcly() {
         // 清理旧窗口，先置空 onDismiss 防止延迟回调覆盖新窗口
-        if let old = pieWindow {
+        if let old = wheelWindow {
             old.onDismiss = nil
             old.dismiss()
         }
-        pieWindow = nil
+        wheelWindow = nil
         isMenuOpen = false
 
-        let window = PieMenuWindow(appState: appState)
+        let window = ArclyWheelWindow(appState: appState)
         window.onDismiss = { [weak self, weak window] in
             // 仅当仍是当前窗口时才清理
-            guard let self = self, self.pieWindow === window else { return }
-            self.pieWindow = nil
+            guard let self = self, self.wheelWindow === window else { return }
+            self.wheelWindow = nil
             self.isMenuOpen = false
         }
         window.onOpenSettings = { [weak self] in
             self?.openSettings()
         }
-        pieWindow = window
+        wheelWindow = window
         let mouseLocation = NSEvent.mouseLocation
         appState.nowPlaying.refreshForMenuPresentation()
         window.showAt(point: mouseLocation)
         isMenuOpen = true
-        NSLog("✅ showPieMenu: window shown at (%.0f, %.0f)", mouseLocation.x, mouseLocation.y)
+        NSLog("✅ showArcly: window shown at (%.0f, %.0f)", mouseLocation.x, mouseLocation.y)
     }
 
-    func closePieMenu() {
-        guard let window = pieWindow else { return }
+    func closeArcly() {
+        guard let window = wheelWindow else { return }
         window.onDismiss = nil
-        pieWindow = nil
+        wheelWindow = nil
         isMenuOpen = false
         window.dismiss()
     }
 
-    @objc func manualShowPieMenu() {
+    @objc func manualShowArcly() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            self.showPieMenu()
+            self.showArcly()
         }
     }
 
@@ -529,7 +521,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 .environmentObject(appState)
             let hostingController = NSHostingController(rootView: settingsView)
             let window = NSWindow(contentViewController: hostingController)
-            window.title = "Arcly 设置"
+            window.title = Loc.string("settings.windowTitle")
             window.styleMask = [.titled, .closable, .miniaturizable]
             window.setContentSize(NSSize(width: 800, height: 420))
             window.center()

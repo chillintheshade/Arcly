@@ -12,7 +12,7 @@
 ## 关键词 (100 字符，逗号分隔，不要空格)
 
 ```
-launcher,pie menu,app switcher,shortcut,dock,productivity,quick launch,hotkey,radial menu,macos
+launcher,radial menu,app switcher,shortcut,dock,productivity,quick launch,hotkey,radial menu,macos
 ```
 
 ---

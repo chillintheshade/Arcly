@@ -1,0 +1,95 @@
+"settings.tab.wheel" = "轮盘";
+"settings.tab.general" = "通用";
+"settings.tab.wheel.subtitle" = "排序与添加";
+"settings.tab.general.subtitle" = "快捷键与行为";
+"settings.windowTitle" = "Arcly 设置";
+
+"menu.show" = "显示 Arcly";
+"menu.settings" = "设置…";
+"menu.quit" = "退出 Arcly";
+"menu.file" = "文件";
+"menu.closeWindow" = "关闭窗口";
+"menu.edit" = "编辑";
+"menu.undo" = "撤销";
+"menu.redo" = "重做";
+"menu.cut" = "剪切";
+"menu.copy" = "拷贝";
+"menu.paste" = "粘贴";
+"menu.selectAll" = "全选";
+
+"onboarding.title" = "欢迎使用 Arcly！";
+"onboarding.body" = "快速上手：\n1. 按 %@ 唤出轮盘菜单\n2. 移动鼠标到目标应用，点击即可启动\n3. 右键或按 Esc 关闭菜单\n4. 点击菜单栏图标打开设置\n\n提示：需要授权「辅助功能」权限才能使用全局快捷键。";
+"onboarding.start" = "开始使用";
+"onboarding.openAccessibility" = "打开辅助功能设置";
+
+"openPanel.add" = "添加";
+"openPanel.fileOrFolder.message" = "选择要添加到轮盘的文件或文件夹";
+
+"settings.addApp" = "添加应用";
+"settings.addApp.subtitle" = "从应用程序选择";
+"settings.addFolder" = "添加文件夹";
+"settings.addFolder.subtitle" = "文件或文件夹都可以";
+"settings.proUnlock" = "Pro 解锁";
+"settings.restoreDefaults" = "恢复默认";
+"settings.restoreDefaults.subtitle" = "重新放回系统常用项";
+
+"wheel.releaseToDelete" = "松开删除";
+"wheel.dragToCenter" = "拖至中心";
+"wheel.delete" = "可删除";
+"wheel.addAppsHint" = "点击下方添加应用";
+"wheel.dragToReorder" = "拖动排序";
+"wheel.dragToCenterDelete" = "拖至中心删除";
+
+"appPicker.title" = "添加应用";
+"appPicker.done" = "完成";
+"appPicker.search" = "搜索应用...";
+
+"settings.group.trigger" = "唤出";
+"settings.group.playback" = "播放";
+"settings.group.wheel" = "轮盘";
+"settings.group.system" = "系统";
+"settings.hotkey" = "快捷键";
+"settings.mouse" = "鼠标";
+"settings.mode" = "模式";
+"settings.nowPlaying" = "正在播放";
+"settings.playbackControls" = "播放控制";
+"settings.haptics" = "触控反馈";
+"settings.sound" = "音效";
+"settings.position" = "位置";
+"settings.theme" = "主题";
+"settings.radius" = "半径";
+"settings.icon" = "图标";
+"settings.opacity" = "透明度";
+"settings.launchAtLogin" = "开机启动";
+"settings.menuBar" = "菜单栏";
+
+"trigger.none" = "无";
+"trigger.middleButton" = "鼠标中键";
+"trigger.sideButton1" = "侧键1（前进）";
+"trigger.sideButton2" = "侧键2（后退）";
+"mode.click" = "点击";
+"mode.hold" = "按住";
+"mode.clickDescription" = "点击模式（按快捷键弹出，鼠标点击选择）";
+"mode.holdDescription" = "按住模式（按住快捷键，松开时选择）";
+"position.mouse" = "鼠标";
+"position.center" = "居中";
+"theme.system" = "系统";
+"theme.light" = "浅";
+"theme.dark" = "深";
+"hotkey.recording" = "按下新快捷键…";
+
+"music.placeholder" = "音乐";
+
+"upgrade.title" = "升级到 Pro";
+"upgrade.feature.slots" = "12 个应用槽位（免费版 6 个）";
+"upgrade.feature.folder" = "添加文件夹到轮盘";
+"upgrade.feature.size" = "自定义菜单大小和图标大小";
+"upgrade.feature.music" = "音乐播放控制";
+"upgrade.feature.mouse" = "鼠标按键快捷触发";
+"upgrade.buy" = "购买 Pro — %@";
+"upgrade.loading" = "加载中...";
+"upgrade.retry" = "重试";
+"upgrade.restore" = "恢复购买";
+"upgrade.cancel" = "取消";
+"pro.productUnavailable" = "商品暂时不可用，请稍后重试";
+"pro.loadingTimeout" = "加载超时，请检查网络后重试";

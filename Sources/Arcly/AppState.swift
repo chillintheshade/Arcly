@@ -3,15 +3,15 @@ import AppKit
 import Carbon
 
 extension Notification.Name {
-    static let hotkeyChanged = Notification.Name("PieMenu.hotkeyChanged")
-    static let appearanceChanged = Notification.Name("PieMenu.appearanceChanged")
-    static let menuBarIconChanged = Notification.Name("PieMenu.menuBarIconChanged")
-    static let mouseTriggerChanged = Notification.Name("PieMenu.mouseTriggerChanged")
+    static let hotkeyChanged = Notification.Name("Arcly.hotkeyChanged")
+    static let appearanceChanged = Notification.Name("Arcly.appearanceChanged")
+    static let menuBarIconChanged = Notification.Name("Arcly.menuBarIconChanged")
+    static let mouseTriggerChanged = Notification.Name("Arcly.mouseTriggerChanged")
 }
 
 // MARK: - Data Models
 
-enum PieItemType: String, Codable {
+enum WheelItemType: String, Codable {
     case app = "app"
     case fileOrFolder = "fileOrFolder"
 }
@@ -21,7 +21,7 @@ struct AppItem: Identifiable, Codable, Equatable {
     var name: String
     var bundleIdentifier: String
     var path: String
-    var itemType: PieItemType = .app
+    var itemType: WheelItemType = .app
     var bookmarkData: Data?
     var customIconData: Data?
 
@@ -67,7 +67,7 @@ struct AppItem: Identifiable, Codable, Equatable {
             }
             return url.lastPathComponent
         }
-        if let cn = AppItem.chineseNames[bundleIdentifier] { return cn }
+        if Loc.prefersChinese, let cn = AppItem.chineseNames[bundleIdentifier] { return cn }
         let url = URL(fileURLWithPath: path)
         if let values = try? url.resourceValues(forKeys: [.localizedNameKey]),
            let localized = values.localizedName {
@@ -343,10 +343,10 @@ enum MouseTrigger: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .none: return "无"
-        case .middleButton: return "鼠标中键"
-        case .sideButton1: return "侧键1（前进）"
-        case .sideButton2: return "侧键2（后退）"
+        case .none: return Loc.string("trigger.none")
+        case .middleButton: return Loc.string("trigger.middleButton")
+        case .sideButton1: return Loc.string("trigger.sideButton1")
+        case .sideButton2: return Loc.string("trigger.sideButton2")
         }
     }
 
@@ -536,9 +536,16 @@ class AppState: ObservableObject {
 
     private let settingsURL: URL = {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dir = appSupport.appendingPathComponent("PieMenu")
+        let dir = appSupport.appendingPathComponent("Arcly")
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-        return dir.appendingPathComponent("settings.json")
+        let url = dir.appendingPathComponent("settings.json")
+        let legacyDir = appSupport.appendingPathComponent("Pie" + "Menu")
+        let legacyURL = legacyDir.appendingPathComponent("settings.json")
+        if !FileManager.default.fileExists(atPath: url.path),
+           FileManager.default.fileExists(atPath: legacyURL.path) {
+            try? FileManager.default.copyItem(at: legacyURL, to: url)
+        }
+        return url
     }()
 
     init() {

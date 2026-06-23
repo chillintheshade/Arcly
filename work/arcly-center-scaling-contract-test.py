@@ -3,9 +3,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PIE_VIEW = ROOT / "Sources" / "PieMenu" / "PieMenuView.swift"
-PIE_WINDOW = ROOT / "Sources" / "PieMenu" / "PieMenuWindow.swift"
-SETTINGS = ROOT / "Sources" / "PieMenu" / "SettingsView.swift"
+PIE_VIEW = ROOT / "Sources" / "Arcly" / "ArclyWheelView.swift"
+PIE_WINDOW = ROOT / "Sources" / "Arcly" / "ArclyWheelWindow.swift"
+SETTINGS = ROOT / "Sources" / "Arcly" / "SettingsView.swift"
 
 
 def main() -> None:

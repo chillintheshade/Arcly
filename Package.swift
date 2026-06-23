@@ -2,12 +2,12 @@
 import PackageDescription
 
 let package = Package(
-    name: "PieMenu",
+    name: "Arcly",
     platforms: [.macOS(.v26)],
     targets: [
         .executableTarget(
-            name: "PieMenu",
-            path: "Sources/PieMenu",
+            name: "Arcly",
+            path: "Sources/Arcly",
             swiftSettings: [
                 .swiftLanguageMode(.v5)
             ]

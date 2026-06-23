@@ -2,7 +2,7 @@
 
 ## Overview
 
-Add a mini music controller to the PieMenu center area. When system media is playing, the center circle shows album art, track name, and playback controls instead of the gear icon. Does not occupy any app slot.
+Add a mini music controller to the Arcly center area. When system media is playing, the center circle shows album art, track name, and playback controls instead of the gear icon. Does not occupy any app slot.
 
 ## Center Area State Machine
 
@@ -48,8 +48,8 @@ A new `ObservableObject` class that:
 
 ### Integration Points
 
-- `PieMenuView.centerContent`: check `nowPlayingService.hasNowPlaying` to decide which view to show
-- `PieMenuWindow` or `PieMenuApp`: call `startObserving()` when menu opens, `stopObserving()` when menu closes
+- `ArclyWheelView.centerContent`: check `nowPlayingService.hasNowPlaying` to decide which view to show
+- `ArclyWheelWindow` or `ArclyApp`: call `startObserving()` when menu opens, `stopObserving()` when menu closes
 - `AppState` holds the `NowPlayingService` instance
 
 ### Animations
@@ -60,12 +60,12 @@ A new `ObservableObject` class that:
 
 ## New Files
 
-- `Sources/PieMenu/NowPlayingService.swift` — MRMediaRemote wrapper + ObservableObject
+- `Sources/Arcly/NowPlayingService.swift` — MRMediaRemote wrapper + ObservableObject
 
 ## Modified Files
 
-- `PieMenuView.swift` — update `centerContent` to include music controller view
-- `PieMenuApp.swift` — wire up start/stop observing on menu open/close
+- `ArclyWheelView.swift` — update `centerContent` to include music controller view
+- `ArclyApp.swift` — wire up start/stop observing on menu open/close
 - `AppState.swift` — hold NowPlayingService instance
 
 ## Scope

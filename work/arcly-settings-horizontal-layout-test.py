@@ -3,9 +3,9 @@ from pathlib import Path
 import re
 
 root = Path(__file__).resolve().parents[1]
-settings = root / "Sources/PieMenu/SettingsView.swift"
-app = root / "Sources/PieMenu/PieMenuApp.swift"
-state = root / "Sources/PieMenu/AppState.swift"
+settings = root / "Sources/Arcly/SettingsView.swift"
+app = root / "Sources/Arcly/ArclyApp.swift"
+state = root / "Sources/Arcly/AppState.swift"
 
 settings_text = settings.read_text()
 app_text = app.read_text()
@@ -17,7 +17,7 @@ checks = [
     ("struct SettingsSidebarButton", "sidebar rows have a dedicated reusable row view"),
     ("SettingsSidebar(selectedTab: $selectedTab)", "settings root uses the sidebar"),
     (".frame(width: 800, height: 420)", "both settings tabs use the same fixed window height"),
-    ("case .apps: return \"轮盘\"", "apps tab is renamed to wheel"),
+    ('case .apps: return Loc.string("settings.tab.wheel")', "apps tab is renamed to wheel"),
     ("private let pieSize: CGFloat = 430", "app wheel preview is enlarged to eat the unused vertical space"),
     ("private var previewMenuRadius: CGFloat", "settings preview uses the runtime wheel radius"),
     ("private var previewOuterDiameter: CGFloat", "settings preview measures the rendered wheel before scaling"),
@@ -90,7 +90,7 @@ assert "controlList" in control_body, "Apps tab should keep only the direct whee
 sidebar_layout = re.search(r"private struct SettingsSidebar: View \{.*?var body: some View \{(?P<body>.*?)\n    \}", settings_text, re.S)
 assert sidebar_layout, "SettingsSidebar body not found"
 sidebar_body = sidebar_layout.group("body")
-assert 'Text("Orbis")' not in sidebar_body, "sidebar should not duplicate the window title brand block"
+assert 'Text("Arcly")' not in sidebar_body, "sidebar should not duplicate the window title brand block"
 assert "液态玻璃" not in sidebar_body, "sidebar should not include the bottom slogan card"
 assert ".padding(.top, 6)" in sidebar_body, "sidebar top padding should be tightened"
 assert ".padding(.horizontal, 10)" in sidebar_body, "sidebar should keep a small horizontal inset"
@@ -120,10 +120,10 @@ assert ".frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)" i
 assert ".padding(.top, 10)" not in general_body, "general tab should not pin controls too high"
 assert ".padding(.bottom, 10)" not in general_body, "general tab should not reserve a bottom gutter"
 assert ".padding(.vertical, 18)" not in general_body, "general tab should not keep the old equal vertical padding"
-assert 'SettingsGroup(title: "唤出")' in settings_text, "general trigger group is missing or poorly named"
-assert 'SettingsGroup(title: "播放")' in settings_text, "general playback group is missing"
-assert 'SettingsGroup(title: "轮盘")' in settings_text, "general wheel group is missing"
-assert 'SettingsGroup(title: "系统")' in settings_text, "general system group is missing"
+assert 'SettingsGroup(title: Loc.string("settings.group.trigger"))' in settings_text, "general trigger group is missing or poorly named"
+assert 'SettingsGroup(title: Loc.string("settings.group.playback"))' in settings_text, "general playback group is missing"
+assert 'SettingsGroup(title: Loc.string("settings.group.wheel"))' in settings_text, "general wheel group is missing"
+assert 'SettingsGroup(title: Loc.string("settings.group.system"))' in settings_text, "general system group is missing"
 assert 'SettingsGroup(title: "偏好")' not in settings_text, "generic preference card should be split into clearer groups"
 assert ".frame(width: pieSize + 34, height: pieSize + 34)" not in settings_text, "preview glow must not expand the wheel coordinate space"
 assert ".scaleEffect((pieSize + 34) / pieSize)" in settings_text, "preview glow should scale visually without shifting icon coordinates"

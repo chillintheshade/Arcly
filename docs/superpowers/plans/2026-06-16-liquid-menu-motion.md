@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add approved liquid-feel appear, dismiss, and icon-focus motion to Orbis while preserving the current glass material.
+**Goal:** Add approved liquid-feel appear, dismiss, and icon-focus motion to Arcly while preserving the current glass material.
 
-**Architecture:** Keep all visual motion in `PieMenuView.swift` as explicit constants and SwiftUI transforms. Keep mouse selection and hit testing in `PieMenuWindow.swift` unchanged except for dismiss timing if the visual close duration changes.
+**Architecture:** Keep all visual motion in `ArclyWheelView.swift` as explicit constants and SwiftUI transforms. Keep mouse selection and hit testing in `ArclyWheelWindow.swift` unchanged except for dismiss timing if the visual close duration changes.
 
 **Tech Stack:** SwiftUI, AppKit, Python source-contract test.
 
@@ -13,27 +13,27 @@
 ### Task 1: Motion Contract Test
 
 **Files:**
-- Create: `work/orbis-liquid-motion-contract-test.py`
+- Create: `work/arcly-liquid-motion-contract-test.py`
 
 - [ ] **Step 1: Write the failing test**
 
-Create a Python script that reads `Sources/PieMenu/PieMenuView.swift` and asserts the presence of named motion constants plus the specific motion hooks for menu visibility, icon focus, running-dot breathing, and center content transition.
+Create a Python script that reads `Sources/Arcly/ArclyWheelView.swift` and asserts the presence of named motion constants plus the specific motion hooks for menu visibility, icon focus, running-dot breathing, and center content transition.
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `python3 work/orbis-liquid-motion-contract-test.py`
+Run: `python3 work/arcly-liquid-motion-contract-test.py`
 
 Expected: FAIL because the current source does not yet contain `MenuMotion` constants or the new motion hooks.
 
 ### Task 2: Menu Appear And Dismiss Motion
 
 **Files:**
-- Modify: `Sources/PieMenu/PieMenuView.swift`
-- Optionally modify: `Sources/PieMenu/PieMenuWindow.swift`
+- Modify: `Sources/Arcly/ArclyWheelView.swift`
+- Optionally modify: `Sources/Arcly/ArclyWheelWindow.swift`
 
 - [ ] **Step 1: Add `MenuMotion` constants**
 
-Define timing and transform constants in `PieMenuView.swift` so the motion values are named and easy to tune.
+Define timing and transform constants in `ArclyWheelView.swift` so the motion values are named and easy to tune.
 
 - [ ] **Step 2: Replace the current global menu scale**
 
@@ -46,7 +46,7 @@ If the dismiss animation is shorter than the existing `0.35s` order-out delay, k
 ### Task 3: Icon Focus Switch Motion
 
 **Files:**
-- Modify: `Sources/PieMenu/PieMenuView.swift`
+- Modify: `Sources/Arcly/ArclyWheelView.swift`
 
 - [ ] **Step 1: Reduce selected icon motion**
 
@@ -63,7 +63,7 @@ Add a very light, material-neutral focus halo behind the selected icon. It must 
 ### Task 4: Center Content Swap Motion
 
 **Files:**
-- Modify: `Sources/PieMenu/PieMenuView.swift`
+- Modify: `Sources/Arcly/ArclyWheelView.swift`
 
 - [ ] **Step 1: Add a stable identity for center content**
 
@@ -76,20 +76,20 @@ Use a short asymmetric transition for the selected app label and music/gear stat
 ### Task 5: Verification
 
 **Files:**
-- Test: `work/orbis-liquid-motion-contract-test.py`
+- Test: `work/arcly-liquid-motion-contract-test.py`
 
 - [ ] **Step 1: Run the contract test**
 
-Run: `python3 work/orbis-liquid-motion-contract-test.py`
+Run: `python3 work/arcly-liquid-motion-contract-test.py`
 
 Expected: PASS.
 
-- [ ] **Step 2: Build Orbis**
+- [ ] **Step 2: Build Arcly**
 
-Run: `xcodebuild -project Orbis.xcodeproj -scheme Orbis -configuration Release build`
+Run: `xcodebuild -project Arcly.xcodeproj -scheme Arcly -configuration Release build`
 
 Expected: build succeeds with exit code 0.
 
 - [ ] **Step 3: Install for manual trial**
 
-Copy the Release app into `/Applications/Orbis.app` only after the build succeeds.
+Copy the Release app into `/Applications/Arcly.app` only after the build succeeds.

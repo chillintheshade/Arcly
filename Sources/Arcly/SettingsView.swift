@@ -10,15 +10,15 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .apps: return "轮盘"
-        case .general: return "通用"
+        case .apps: return Loc.string("settings.tab.wheel")
+        case .general: return Loc.string("settings.tab.general")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .apps: return "排序与添加"
-        case .general: return "快捷键与行为"
+        case .apps: return Loc.string("settings.tab.wheel.subtitle")
+        case .general: return Loc.string("settings.tab.general.subtitle")
         }
     }
 
@@ -195,8 +195,8 @@ struct AppsSettingsView: View {
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = false
         panel.resolvesAliases = true
-        panel.prompt = "添加"
-        panel.message = "选择要添加到轮盘的文件或文件夹"
+        panel.prompt = Loc.string("openPanel.add")
+        panel.message = Loc.string("openPanel.fileOrFolder.message")
         if panel.runModal() == .OK, let url = panel.url {
             let bookmarkData = try? url.bookmarkData(
                 options: [.withSecurityScope],
@@ -255,8 +255,8 @@ struct AppsSettingsView: View {
     private var controlList: some View {
         VStack(spacing: 0) {
             actionTile(
-                "添加应用",
-                subtitle: "从应用程序选择",
+                Loc.string("settings.addApp"),
+                subtitle: Loc.string("settings.addApp.subtitle"),
                 icon: "plus.app"
             ) {
                 if appState.settings.apps.count >= maxSlots && !appState.pro.isPro {
@@ -271,8 +271,8 @@ struct AppsSettingsView: View {
                 .padding(.leading, 44)
 
             actionTile(
-                "添加文件夹",
-                subtitle: appState.pro.canAddFolder ? "文件或文件夹都可以" : "Pro 解锁",
+                Loc.string("settings.addFolder"),
+                subtitle: appState.pro.canAddFolder ? Loc.string("settings.addFolder.subtitle") : Loc.string("settings.proUnlock"),
                 icon: "folder.badge.plus",
                 badge: appState.pro.isPro ? nil : "PRO"
             ) {
@@ -287,8 +287,8 @@ struct AppsSettingsView: View {
                 .padding(.leading, 44)
 
             actionTile(
-                "恢复默认",
-                subtitle: "重新放回系统常用项",
+                Loc.string("settings.restoreDefaults"),
+                subtitle: Loc.string("settings.restoreDefaults.subtitle"),
                 icon: "arrow.counterclockwise"
             ) {
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
@@ -432,7 +432,7 @@ struct AppsSettingsView: View {
                 VStack(spacing: 4) {
                     Image(systemName: "trash.fill")
                         .font(.system(size: 26, weight: .semibold))
-                    Text("松开删除")
+                    Text(Loc.string("wheel.releaseToDelete"))
                         .font(.system(size: 10, weight: .medium))
                 }
                 .foregroundStyle(.red)
@@ -441,9 +441,9 @@ struct AppsSettingsView: View {
             // 2. 拖拽中（未进入删除区）
             else if draggingIndex != nil {
                 VStack(spacing: 2) {
-                    Text("拖至中心")
+                    Text(Loc.string("wheel.dragToCenter"))
                         .font(.system(size: 10))
-                    Text("可删除")
+                    Text(Loc.string("wheel.delete"))
                         .font(.system(size: 10))
                 }
                 .foregroundStyle(.secondary)
@@ -460,16 +460,16 @@ struct AppsSettingsView: View {
             }
             // 4. 空状态
             else if appState.settings.apps.isEmpty {
-                Text("点击下方添加应用")
+                Text(Loc.string("wheel.addAppsHint"))
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }
             // 5. 默认提示
             else {
                 VStack(spacing: 2) {
-                    Text("拖动排序")
+                    Text(Loc.string("wheel.dragToReorder"))
                         .font(.system(size: 10))
-                    Text("拖至中心删除")
+                    Text(Loc.string("wheel.dragToCenterDelete"))
                         .font(.system(size: 10))
                 }
                 .foregroundStyle(.tertiary)
@@ -667,15 +667,15 @@ struct AppPickerView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("添加应用")
+                Text(Loc.string("appPicker.title"))
                     .font(.system(size: 15, weight: .semibold))
                 Spacer()
-                Button("完成") { isPresented = false }
+                Button(Loc.string("appPicker.done")) { isPresented = false }
                     .buttonStyle(.glass)
                     .keyboardShortcut(.defaultAction)
             }
 
-            SearchField(text: $searchText, placeholder: "搜索应用...")
+            SearchField(text: $searchText, placeholder: Loc.string("appPicker.search"))
 
             List(filteredApps) { app in
                 let justAdded = recentlyAdded.contains(app.bundleIdentifier)
@@ -833,12 +833,12 @@ struct GeneralSettingsView: View {
     }
 
     private var triggerGroup: some View {
-        SettingsGroup(title: "唤出") {
+        SettingsGroup(title: Loc.string("settings.group.trigger")) {
             HotkeyRecorderRow(appState: appState)
 
             SettingDivider()
 
-            SettingRow(title: "鼠标", locked: !appState.pro.isPro) {
+            SettingRow(title: Loc.string("settings.mouse"), locked: !appState.pro.isPro) {
                 Picker("", selection: $appState.settings.mouseTrigger) {
                     ForEach(MouseTrigger.allCases, id: \.self) { trigger in
                         Text(trigger.displayName).tag(trigger)
@@ -854,10 +854,10 @@ struct GeneralSettingsView: View {
 
             SettingDivider()
 
-            SettingRow(title: "模式") {
+            SettingRow(title: Loc.string("settings.mode")) {
                 Picker("", selection: $appState.settings.interactionMode) {
-                    Text("点击").tag(InteractionMode.click)
-                    Text("按住").tag(InteractionMode.hold)
+                    Text(Loc.string("mode.click")).tag(InteractionMode.click)
+                    Text(Loc.string("mode.hold")).tag(InteractionMode.hold)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
@@ -867,15 +867,15 @@ struct GeneralSettingsView: View {
     }
 
     private var playbackGroup: some View {
-        SettingsGroup(title: "播放") {
-            SettingRow(title: "正在播放") {
+        SettingsGroup(title: Loc.string("settings.group.playback")) {
+            SettingRow(title: Loc.string("settings.nowPlaying")) {
                 Toggle("", isOn: $appState.settings.showMusicControl)
                     .labelsHidden()
             }
 
             SettingDivider()
 
-            SettingRow(title: "播放控制", locked: !appState.pro.isPro) {
+            SettingRow(title: Loc.string("settings.playbackControls"), locked: !appState.pro.isPro) {
                 Toggle("", isOn: .constant(appState.pro.canControlMusic))
                     .labelsHidden()
                     .disabled(!appState.pro.isPro)
@@ -883,14 +883,14 @@ struct GeneralSettingsView: View {
 
             SettingDivider()
 
-            SettingRow(title: "触控反馈") {
+            SettingRow(title: Loc.string("settings.haptics")) {
                 Toggle("", isOn: $appState.settings.hapticFeedback)
                     .labelsHidden()
             }
 
             SettingDivider()
 
-            SettingRow(title: "音效") {
+            SettingRow(title: Loc.string("settings.sound")) {
                 Toggle("", isOn: $appState.settings.soundEffects)
                     .labelsHidden()
             }
@@ -898,11 +898,11 @@ struct GeneralSettingsView: View {
     }
 
     private var wheelGroup: some View {
-        SettingsGroup(title: "轮盘") {
-            SettingRow(title: "位置") {
+        SettingsGroup(title: Loc.string("settings.group.wheel")) {
+            SettingRow(title: Loc.string("settings.position")) {
                 Picker("", selection: $appState.settings.menuPosition) {
-                    Text("鼠标").tag(MenuPosition.followMouse)
-                    Text("居中").tag(MenuPosition.screenCenter)
+                    Text(Loc.string("position.mouse")).tag(MenuPosition.followMouse)
+                    Text(Loc.string("position.center")).tag(MenuPosition.screenCenter)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
@@ -911,11 +911,11 @@ struct GeneralSettingsView: View {
 
             SettingDivider()
 
-            SettingRow(title: "主题") {
+            SettingRow(title: Loc.string("settings.theme")) {
                 Picker("", selection: $appState.settings.appearanceMode) {
-                    Text("系统").tag(AppearanceMode.system)
-                    Text("浅").tag(AppearanceMode.light)
-                    Text("深").tag(AppearanceMode.dark)
+                    Text(Loc.string("theme.system")).tag(AppearanceMode.system)
+                    Text(Loc.string("theme.light")).tag(AppearanceMode.light)
+                    Text(Loc.string("theme.dark")).tag(AppearanceMode.dark)
                 }
                 .labelsHidden()
                 .pickerStyle(.segmented)
@@ -928,7 +928,7 @@ struct GeneralSettingsView: View {
             SettingDivider()
 
             sliderRow(
-                title: "半径",
+                title: Loc.string("settings.radius"),
                 value: $appState.settings.menuRadius,
                 range: 100...180,
                 step: 10,
@@ -938,7 +938,7 @@ struct GeneralSettingsView: View {
             SettingDivider()
 
             sliderRow(
-                title: "图标",
+                title: Loc.string("settings.icon"),
                 value: $appState.settings.iconSize,
                 range: 32...64,
                 step: 4,
@@ -948,7 +948,7 @@ struct GeneralSettingsView: View {
             SettingDivider()
 
             opacitySliderRow(
-                title: "透明度",
+                title: Loc.string("settings.opacity"),
                 value: $appState.settings.menuOpacity,
                 range: 0.15...1.0,
                 step: 0.05
@@ -957,8 +957,8 @@ struct GeneralSettingsView: View {
     }
 
     private var systemGroup: some View {
-        SettingsGroup(title: "系统") {
-            SettingRow(title: "开机启动") {
+        SettingsGroup(title: Loc.string("settings.group.system")) {
+            SettingRow(title: Loc.string("settings.launchAtLogin")) {
                 Toggle("", isOn: $launchAtLogin)
                     .labelsHidden()
                     .onChange(of: launchAtLogin) { newValue in
@@ -968,7 +968,7 @@ struct GeneralSettingsView: View {
 
             SettingDivider()
 
-            SettingRow(title: "菜单栏") {
+            SettingRow(title: Loc.string("settings.menuBar")) {
                 Toggle("", isOn: $appState.settings.showMenuBarIcon)
                     .labelsHidden()
                     .onChange(of: appState.settings.showMenuBarIcon) { _ in
@@ -1062,12 +1062,12 @@ struct HotkeyRecorderRow: View {
 
     var body: some View {
         HStack {
-            Text("快捷键")
+            Text(Loc.string("settings.hotkey"))
                 .font(.system(size: 12, weight: .medium))
             Spacer()
 
             if isRecording {
-                Text("按下新快捷键…")
+                Text(Loc.string("hotkey.recording"))
                     .font(.system(size: 12))
                     .foregroundColor(.accentColor)
                     .padding(.horizontal, 12)
@@ -1223,8 +1223,8 @@ struct SearchField: NSViewRepresentable {
 extension InteractionMode {
     var displayName: String {
         switch self {
-        case .hold: return "按住模式（按住快捷键，松开时选择）"
-        case .click: return "点击模式（按快捷键弹出，鼠标点击选择）"
+        case .hold: return Loc.string("mode.holdDescription")
+        case .click: return Loc.string("mode.clickDescription")
         }
     }
 }
@@ -1237,15 +1237,15 @@ struct UpgradeView: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("升级到 Pro")
+            Text(Loc.string("upgrade.title"))
                 .font(.system(size: 20, weight: .bold))
 
             VStack(alignment: .leading, spacing: 12) {
-                featureRow(icon: "square.grid.3x3.fill", text: "12 个应用槽位（免费版 6 个）")
-                featureRow(icon: "folder.fill", text: "添加文件夹到轮盘")
-                featureRow(icon: "slider.horizontal.3", text: "自定义菜单大小和图标大小")
-                featureRow(icon: "play.circle.fill", text: "音乐播放控制")
-                featureRow(icon: "computermouse.fill", text: "鼠标按键快捷触发")
+                featureRow(icon: "square.grid.3x3.fill", text: Loc.string("upgrade.feature.slots"))
+                featureRow(icon: "folder.fill", text: Loc.string("upgrade.feature.folder"))
+                featureRow(icon: "slider.horizontal.3", text: Loc.string("upgrade.feature.size"))
+                featureRow(icon: "play.circle.fill", text: Loc.string("upgrade.feature.music"))
+                featureRow(icon: "computermouse.fill", text: Loc.string("upgrade.feature.mouse"))
             }
             .padding(.horizontal, 20)
 
@@ -1260,7 +1260,7 @@ struct UpgradeView: View {
                                 ProgressView()
                                     .controlSize(.small)
                             }
-                            Text("购买 Pro — \(product.displayPrice)")
+                            Text(Loc.string("upgrade.buy", product.displayPrice))
                                 .font(.system(size: 14, weight: .semibold))
                         }
                         .frame(maxWidth: .infinity)
@@ -1271,7 +1271,7 @@ struct UpgradeView: View {
                     .padding(.horizontal, 40)
                 }
             case .loading:
-                ProgressView("加载中...")
+                ProgressView(Loc.string("upgrade.loading"))
             case .failed(let message):
                 VStack(spacing: 8) {
                     Image(systemName: "exclamationmark.triangle.fill")
@@ -1281,7 +1281,7 @@ struct UpgradeView: View {
                         .font(.system(size: 12))
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
-                    Button("重试") {
+                    Button(Loc.string("upgrade.retry")) {
                         Task { await appState.pro.loadProduct() }
                     }
                     .buttonStyle(.bordered)
@@ -1289,14 +1289,14 @@ struct UpgradeView: View {
                 .padding(.horizontal, 40)
             }
 
-            Button("恢复购买") {
+            Button(Loc.string("upgrade.restore")) {
                 Task { await appState.pro.restore() }
             }
             .buttonStyle(.plain)
             .font(.system(size: 12))
             .foregroundColor(.secondary)
 
-            Button("取消") { dismiss() }
+            Button(Loc.string("upgrade.cancel")) { dismiss() }
                 .buttonStyle(.plain)
                 .font(.system(size: 12))
                 .foregroundColor(.secondary)

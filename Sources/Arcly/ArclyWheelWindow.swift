@@ -6,30 +6,30 @@ import AVFoundation
 // MARK: - 拖放目标视图
 
 class DropTargetHostingView<Content: View>: NSHostingView<Content> {
-    weak var pieWindow: PieMenuWindow?
+    weak var wheelWindow: ArclyWheelWindow?
 
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
-        pieWindow?.handleDragUpdate(sender)
+        wheelWindow?.handleDragUpdate(sender)
         return .copy
     }
 
     override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
-        pieWindow?.handleDragUpdate(sender)
+        wheelWindow?.handleDragUpdate(sender)
         return .copy
     }
 
     override func draggingExited(_ sender: NSDraggingInfo?) {
-        pieWindow?.appState.selectedIndex = nil
+        wheelWindow?.appState.selectedIndex = nil
     }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
-        return pieWindow?.handleDrop(sender) ?? false
+        return wheelWindow?.handleDrop(sender) ?? false
     }
 }
 
-// MARK: - PieMenuWindow
+// MARK: - ArclyWheelWindow
 
-class PieMenuWindow: NSWindow {
+class ArclyWheelWindow: NSWindow {
     let appState: AppState
     private var mouseMonitor: Any?
     private var localMouseMonitor: Any?
@@ -41,7 +41,7 @@ class PieMenuWindow: NSWindow {
     var onDismiss: (() -> Void)?
     var onOpenSettings: (() -> Void)?
 
-    private let windowSize: CGFloat = PieMenuView.windowSize
+    private let windowSize: CGFloat = ArclyWheelView.windowSize
     private let centerControlHitRadius: CGFloat = 96
     private var centerLensRadius: CGFloat {
         let innerRadius = appState.settings.menuRadius - 50
@@ -75,7 +75,7 @@ class PieMenuWindow: NSWindow {
 
     init(appState: AppState) {
         self.appState = appState
-        let size = PieMenuView.windowSize
+        let size = ArclyWheelView.windowSize
         super.init(
             contentRect: NSRect(x: 0, y: 0, width: size, height: size),
             styleMask: [.borderless],
@@ -93,14 +93,14 @@ class PieMenuWindow: NSWindow {
         self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
         self.acceptsMouseMovedEvents = true
 
-        let menuView = PieMenuView(appState: appState, onAppSelected: { [weak self] app in
+        let menuView = ArclyWheelView(appState: appState, onAppSelected: { [weak self] app in
             self?.launchApp(app)
             self?.dismiss()
         }, onSettingsTapped: { [weak self] in
             self?.dismissForSettings()
         })
         let hosting = DropTargetHostingView(rootView: menuView)
-        hosting.pieWindow = self
+        hosting.wheelWindow = self
         hosting.frame = NSRect(x: 0, y: 0, width: size, height: size)
         hosting.registerForDraggedTypes([.fileURL])
         self.contentView = hosting

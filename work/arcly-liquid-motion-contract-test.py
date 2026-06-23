@@ -3,8 +3,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-VIEW_SOURCE = ROOT / "Sources" / "PieMenu" / "PieMenuView.swift"
-WINDOW_SOURCE = ROOT / "Sources" / "PieMenu" / "PieMenuWindow.swift"
+VIEW_SOURCE = ROOT / "Sources" / "Arcly" / "ArclyWheelView.swift"
+WINDOW_SOURCE = ROOT / "Sources" / "Arcly" / "ArclyWheelWindow.swift"
 
 
 def require(source: str, needle: str, reason: str) -> None:

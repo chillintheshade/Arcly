@@ -3,8 +3,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_SOURCE = ROOT / "Sources" / "PieMenu" / "PieMenuApp.swift"
-NOW_PLAYING_SOURCE = ROOT / "Sources" / "PieMenu" / "NowPlayingService.swift"
+APP_SOURCE = ROOT / "Sources" / "Arcly" / "ArclyApp.swift"
+NOW_PLAYING_SOURCE = ROOT / "Sources" / "Arcly" / "NowPlayingService.swift"
 
 
 def require(source: str, needle: str, reason: str) -> None:

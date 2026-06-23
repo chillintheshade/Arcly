@@ -105,9 +105,9 @@ enum MenuMotion {
     }
 }
 
-// MARK: - PieMenuView
+// MARK: - ArclyWheelView
 
-struct PieMenuView: View {
+struct ArclyWheelView: View {
     @ObservedObject var appState: AppState
     var onAppSelected: ((AppItem) -> Void)?
     var onSettingsTapped: (() -> Void)?
@@ -472,7 +472,7 @@ struct PieMenuView: View {
             // 曲名 - 歌手
             Group {
                 if nowPlaying.trackName.isEmpty {
-                    Text("音乐")
+                    Text(Loc.string("music.placeholder"))
                         .foregroundStyle(.tertiary)
                 } else if nowPlaying.artistName.isEmpty {
                     Text(nowPlaying.trackName)

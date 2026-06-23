@@ -1,4 +1,4 @@
-name: Orbis
+name: Arcly
 options:
   bundleIdPrefix: com.orbis
   deploymentTarget:
@@ -14,13 +14,15 @@ settings:
     CURRENT_PROJECT_VERSION: "2"
 
 targets:
-  Orbis:
+  Arcly:
     type: application
     platform: macOS
     sources:
-      - path: Sources/PieMenu
+      - path: Sources/Arcly
         type: group
       - path: Resources/Assets.xcassets
+      - path: Resources/en.lproj/Localizable.strings
+      - path: Resources/zh-Hans.lproj/Localizable.strings
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.qingshan.orbis
@@ -39,6 +41,6 @@ targets:
         SWIFT_EMIT_LOC_STRINGS: true
       configs:
         Debug:
-          CODE_SIGN_ENTITLEMENTS: Orbis.debug.entitlements
+          CODE_SIGN_ENTITLEMENTS: Arcly.debug.entitlements
         Release:
-          CODE_SIGN_ENTITLEMENTS: Orbis.entitlements
+          CODE_SIGN_ENTITLEMENTS: Arcly.entitlements

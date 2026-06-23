@@ -3,9 +3,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_STATE = ROOT / "Sources" / "PieMenu" / "AppState.swift"
-PIE_VIEW = ROOT / "Sources" / "PieMenu" / "PieMenuView.swift"
-SETTINGS_VIEW = ROOT / "Sources" / "PieMenu" / "SettingsView.swift"
+APP_STATE = ROOT / "Sources" / "Arcly" / "AppState.swift"
+PIE_VIEW = ROOT / "Sources" / "Arcly" / "ArclyWheelView.swift"
+SETTINGS_VIEW = ROOT / "Sources" / "Arcly" / "SettingsView.swift"
 
 
 def require(source: str, needle: str, reason: str) -> None:
@@ -33,8 +33,8 @@ def main() -> None:
     pie_requirements = [
         ("private var menuGlassOpacity: Double", "clamped menu glass opacity accessor"),
         ("private var glassSurfaceFillOpacity: Double", "visible opacity-mapped glass surface"),
-        ("appState.settings.menuOpacity", "pie menu reads saved opacity"),
-        ("glassSurfaceLayer", "pie menu renders a visible opacity surface"),
+        ("appState.settings.menuOpacity", "radial menu reads saved opacity"),
+        ("glassSurfaceLayer", "radial menu renders a visible opacity surface"),
         ("glassRefractionLayer", "static glass refraction overlay"),
         (".opacity(menuGlassOpacity)", "opacity affects glass layers"),
     ]
@@ -42,7 +42,7 @@ def main() -> None:
         require(pie_view, needle, reason)
 
     settings_requirements = [
-        ("title: \"透明度\"", "opacity slider label"),
+        ('title: Loc.string("settings.opacity")', "opacity slider label"),
         ("value: $appState.settings.menuOpacity", "opacity slider binding"),
         ("range: 0.15...1.0", "opacity slider range with visible low end"),
         ("step: 0.05", "opacity slider step"),

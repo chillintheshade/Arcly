@@ -222,7 +222,7 @@ class NowPlayingService: ObservableObject {
 
     private static let helperScriptURL: URL? = {
         guard let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first?
-            .appendingPathComponent("PieMenu") else {
+            .appendingPathComponent("Arcly") else {
             return nil
         }
         try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)

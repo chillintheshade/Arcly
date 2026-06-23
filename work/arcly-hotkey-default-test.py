@@ -3,7 +3,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "Sources" / "PieMenu" / "AppState.swift"
+SOURCE = ROOT / "Sources" / "Arcly" / "AppState.swift"
 
 
 def require(source: str, needle: str, reason: str) -> None:
